@@ -1,9 +1,9 @@
-json_files/
-__pycache__/
+**/json_files/
+**/__pycache__/
 *.py[cod]
 *$py.class
+**/api_keys.py
 
-.Python
 build/
 develop-eggs/
 dist/
@@ -27,10 +27,6 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-
-# PyBuilder
-target/
-
 # pyenv
 .python-version
 
@@ -44,8 +40,3 @@ ENV/
 env.bak/
 venv.bak/
 
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
