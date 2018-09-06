@@ -5,6 +5,8 @@ import json
 import pprint
 from json_parser import JsonTweetParser
 
+print("imports Initialized...")
+
 # Variables that contains the user credentials to access Twitter API
 ACCESS_TOKEN = '2595154250-0km2QTCdVlIBT2JCxIv5PKddeY5Xu7CgJTDvE2O'
 ACCESS_SECRET = 'eljaMJsc2GfxP78fS9gIziEY9MIdDQcmYsR0ZbSpfRsnI'
@@ -12,6 +14,8 @@ CONSUMER_KEY = 'gAKgshf3Afq0EKTIAEhrlhf9Y'
 CONSUMER_SECRET = 'HncR3egFG7NqzULSSEc6Yx8SwqdY3HwuNiYO11G44x3b5sW39e'
 
 oauth = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
+
+print("Authenticated Twitter API Key")
 
 # Initiate the connection to Twitter Streaming API
 twitter_stream = TwitterStream(auth=oauth)
