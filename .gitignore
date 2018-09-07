@@ -3,6 +3,9 @@
 *.py[cod]
 *$py.class
 **/api_keys.py
+**/json_files/
+**/tmp/
+**/data/
 
 build/
 develop-eggs/

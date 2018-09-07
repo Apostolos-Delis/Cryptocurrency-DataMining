@@ -7,6 +7,7 @@ import pprint
 from json_parser import JsonTweetParser
 
 # Variables that contains the user credentials to access Twitter API
+from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET 
 
 oauth = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 
@@ -52,12 +53,15 @@ iterator = twitter_stream.statuses.sample()
 
 twitter = Twitter(auth=oauth)
 
+hashtags = [ "bitcoin", "ethereum", "litecoin", "ripple", "bcash", "eos", "stellarlumens",
+        "monero", "nano", "vechain"]
+
 print("Beginning to pull data...")
 count = 0
 while True:
 
     timestr = time.strftime("%Y-%m-%d_%H-%M-%S")
-    current_path = "/Users/apostolos/Documents/Programing/Recreational Projects/Crypto-Trading-Bot-Tutorial/json_files"
+    current_path = "json_files"
     file_name = os.path.join(current_path, "btc_" + str(count) + "_" + str(timestr) + ".json")
     # Search for latest tweets about "#nlproc"
     twitter.search.tweets(q='#bitcoin')
@@ -69,14 +73,12 @@ while True:
     print("File Number", count, "created. Name:", file_name.split('/')[-1])
     time.sleep(15)
 
-    file = open(
-        "/Users/apostolos/Documents/Programing/Recreational Projects/Crypto-Trading-Bot-Tutorial/tweets.json", 'a+')
+    file = open("tmp/tweets.json", 'a+')
 
     json_data = json.load(open(file_name, 'r'))
 
     for index, tweet in enumerate(json_data['statuses']):
         jsonParser = JsonTweetParser(json_data['statuses'][index], time_str=timestr)
-        # pprint.pprint(jsonParser.construct_user_json())
         file.write(str(jsonParser.construct_tweet_json()) + ",\n")
 
     file.close()
