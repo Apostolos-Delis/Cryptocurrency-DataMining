@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
+# coding: utf8
+
 """
 Script for quickly seting up all the directories necessary for the data mining
 """
 import os
 import path
+
+from constants import JSON_DIR, TWEET_DIR, DATA_DIR
+
 
 def make_directory(file_path: str):
     """
@@ -23,10 +28,6 @@ def make_directory(file_path: str):
 
 if __name__ == "__main__":
     
-    DATA_DIR = "data"
-    JSON_DIR = "data/json_files"
-    TWEET_DIR = "data/tweets"
-    
     make_directory(DATA_DIR)
     make_directory(JSON_DIR)
     make_directory(TWEET_DIR)
@@ -37,4 +38,3 @@ if __name__ == "__main__":
     for hashtag in hashtags: 
         make_directory(os.path.join(JSON_DIR, hashtag))
         make_directory(os.path.join(TWEET_DIR, hashtag))
-

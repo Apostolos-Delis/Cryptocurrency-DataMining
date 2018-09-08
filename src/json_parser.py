@@ -1,3 +1,8 @@
+# coding: utf8
+
+"""
+Class that correctly identifies the different components of a tweet and assembles it into a dictionary to be added to a database.
+"""
 import json
 from pprint import pprint
 import time
@@ -9,13 +14,13 @@ class JsonTweetParser:
         self.tweet_json = tweet
         self.time_str = time_str
 
-    def get_tweetid(self)->int:
+    def get_tweetid(self) -> int:
         """
         :return: the unique id of a tweet
         """
         return self.tweet_json['id']
 
-    def get_hashtags(self)->list:
+    def get_hashtags(self) -> list:
         """
         :return: a list of the hashtags of a tweet
         """
@@ -25,16 +30,16 @@ class JsonTweetParser:
             hashtags.append(i['text'])
         return hashtags
 
-    def get_date(self)->str:
+    def get_date(self) -> str:
         """
         :return: the date of which a tweet was posted
         """
         return self.time_str
 
-    def get_retweets(self)->int:
+    def get_retweets(self) -> int:
         return self.tweet_json['retweet_count']
 
-    def get_userinfo(self)->dict:
+    def get_userinfo(self) -> dict:
         user = {
             "date_created": self.tweet_json['user']['created_at'],
             "id": self.tweet_json['user']["id"],
@@ -43,7 +48,7 @@ class JsonTweetParser:
         }
         return user
 
-    def get_tweet(self)->str:
+    def get_tweet(self) -> str:
         return self.tweet_json['text']
 
     def construct_tweet_json(self):
@@ -59,9 +64,4 @@ class JsonTweetParser:
 
 
 if __name__ == "__main__":
-    name = "/Users/apostolos/Documents/Programing/Recreational Projects/Crypto-Trading-Bot-Tutorial/json_files/btc_0_2018-04-17_00-16-46.json"
-    data = json.load(open(name))
-
-    timestr = time.strftime("%Y-%m-%d_%H-%M-%S")
-    jsonParser = JsonTweetParser(data['statuses'][0], time_str=timestr)
-    pprint(jsonParser.construct_user_json())
+    pass
