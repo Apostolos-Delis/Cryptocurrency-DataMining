@@ -20,9 +20,9 @@ import threading
 import time
 from queue import Queue
 
-from json_parser import JsonTweetParser
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
+from json_parser import JsonTweetParser
 from constants import JSON_DIR, TWEET_DIR, DATA_DIR
 
 # Variables that contains the user credentials to access Twitter API
@@ -41,7 +41,7 @@ try:
     import json
 except ImportError:
     import simplejson as json
-
+    
 #Hashtags that will be searched for using the twitter api
 hashtags = [ "bitcoin", "ethereum", "litecoin", "ripple", "bcash", "eos",
            "stellarlumens", "monero", "nano", "vechain"]
@@ -52,11 +52,57 @@ NUM_TWEETS = 300
 
 twitter = Twitter(auth=oauth)
 
+json_file_name = "tmp/JSON_TEMP.json"
+
+"""
+raw_tweets = twitter.search.tweets(q="bitcoin",
+    result_type='recent', lang='en', count=10)
+
+file = open(json_file_name, "w+")
+file.write(json.dumps(raw_tweets, indent=10))
+file.close()
+
+json_data = json.load(open(json_file_name, 'r'))
+
+
+#Construct formatted tweet data and write it in the tweet file
+jsonParser = JsonTweetParser(
+     json_data["statuses"][0])
+
+print(str(jsonParser.construct_tweet_json(string_=True)) + ",\n")
+
+exit(0)
+"""
+
 print("Beginning to pull data...")
 
 print_lock = threading.Lock()
 
+def create_tweet_json(name: str):
+    """
+    TODO: Write documentation for create_tweet_json
+    """
+    json_file = open(name, 'a')
+    json_file.write("{\n")
+    json_file.write("    \"tweets\": [\n")
+    
+    return json_file 
 
+def close_tweet_json(json_file):
+    """
+    TODO: WRite the documentation for the close_tweet_json
+    """
+    json_file.write("   ]\n}\n")
+    json_file.close()
+
+def write_tweet_to_json(tweet: str, json_file: str, indent=2):
+    """
+    TODO: WRite the documentation for the write_tweet_to_json
+    """
+    tab = "    "
+    json_file.write(indent * tab)
+    json_file.write(tweet)
+    
 def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
                     verbose=False):
     """
@@ -69,25 +115,29 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
     """
     
     file_name = hashtag + "_" + str(time_str) + ".json"
-    json_file_name =  os.path.join(JSON_DIR, file_name)
-    # Search for latest tweets about "#nlproc"
+    json_file_name =  os.path.join(os.path.join(JSON_DIR, hashtag), file_name)
+    
+    # Search for latest tweets about the hashtag currenty selected
     raw_tweets = twitter.search.tweets(q=hashtag,
         result_type='recent', lang='en', count=NUM_TWEETS)
     file = open(json_file_name, "a+")
     file.write(json.dumps(raw_tweets, indent=10))
     file.close()
 
-    tweet_file = open(
-        os.path.join(os.path.join(TWEET_DIR, hashtag), file_name), 'a+')
+    tweet_file = create_tweet_json(
+            os.path.join(os.path.join(TWEET_DIR, hashtag), file_name))
 
     json_data = json.load(open(json_file_name, 'r'))
 
+    #Construct formatted tweet data and write it in the tweet file
     for index, tweet in enumerate(json_data['statuses']):
         jsonParser = JsonTweetParser(
             json_data['statuses'][index], time_str=time_str)
-        tweet_file.write(str(jsonParser.construct_tweet_json()) + ",\n")
 
-    tweet_file.close()
+        write_tweet_to_json(json.dumps(jsonParser.construct_tweet_json()) + ",\n",
+                tweet_file, indent=2)
+
+    close_tweet_json(tweet_file)
     
     
     with print_lock:
@@ -114,9 +164,9 @@ def threader():
 if os.path.isfile("mkdirectories.py"):
     os.system("./mkdirectories.py")
 else:
-    import sys
+    from sys import stderr
     print("\033[31mERROR: mkdirectories.py is not in the current directory.\033[0m",
-         file=sys.stderr)
+         file=stderr)
     exit(-1)
 
 
@@ -159,7 +209,7 @@ while True:
         if (time.time() - iteration_start) >= SECONDS_PER_ITERATION:
             break
 
-    if count == 3:
+    if count == 100000000000:
         break
     
     count += 1
