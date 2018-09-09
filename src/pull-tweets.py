@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
 # coding: utf8
 
+"""
+Multithreaded Implementation of twitter data collection for several different
+cryptocurrencies.
+
+External Dependencies:
+    * twitter api installed for python "pip install twitter"
+    * file called api_keys.py containing the four different str constants for 
+    the twitter api keys
+    * file called mkdirectories.py which initializes the data directory 
+    heirarchy
+"""
 import time
 import os
 import json
@@ -36,8 +47,8 @@ hashtags = [ "bitcoin", "ethereum", "litecoin", "ripple", "bcash", "eos",
            "stellarlumens", "monero", "nano", "vechain"]
 
 NUM_THREADS = len(hashtags)
-
 SECONDS_PER_ITERATION = 15
+NUM_TWEETS = 300
 
 twitter = Twitter(auth=oauth)
 
@@ -46,30 +57,48 @@ print("Beginning to pull data...")
 print_lock = threading.Lock()
 
 
-def mine_tweet_data(hashtag: str, time_str):
+def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
+                    verbose=False):
+    """
+    Mines one hashtag from twitter using the twitter api at a specified time 
+    and creates a file with the cleaned out tweets
+    
+    :param hashtag: str containing the hashtag that will be searched
+    :param time_str: str showing the time of when the data was pulled
+    :param verbose: bool to toggle printing the thread and hashtag
+    """
     
     file_name = hashtag + "_" + str(time_str) + ".json"
     json_file_name =  os.path.join(JSON_DIR, file_name)
     # Search for latest tweets about "#nlproc"
-    sfo_trends = twitter.search.tweets(q=hashtag, result_type='recent', lang='en', count=300)
+    raw_tweets = twitter.search.tweets(q=hashtag,
+        result_type='recent', lang='en', count=NUM_TWEETS)
     file = open(json_file_name, "a+")
-    file.write(json.dumps(sfo_trends, indent=10))
+    file.write(json.dumps(raw_tweets, indent=10))
     file.close()
 
-    tweet_file = open(os.path.join(os.path.join(TWEET_DIR, hashtag), file_name), 'a+')
+    tweet_file = open(
+        os.path.join(os.path.join(TWEET_DIR, hashtag), file_name), 'a+')
 
     json_data = json.load(open(json_file_name, 'r'))
 
     for index, tweet in enumerate(json_data['statuses']):
-        jsonParser = JsonTweetParser(json_data['statuses'][index], time_str=time_str)
+        jsonParser = JsonTweetParser(
+            json_data['statuses'][index], time_str=time_str)
         tweet_file.write(str(jsonParser.construct_tweet_json()) + ",\n")
 
     tweet_file.close()
     
+    
     with print_lock:
-        print(threading.current_thread().name, hashtag)
+        if verbose:
+            print(threading.current_thread().name, hashtag)
 
 def threader():
+    """ 
+    Main multithreading function for each thread that looks for available
+    hashtags to mine.
+    """
     while True:
         
         hashtag = q.get()
@@ -107,21 +136,25 @@ while True:
         threads.append(t)
         t.start()
         
+    # Add the hashtags to be searched into the queue
     for worker in hashtags:
         q.put(worker)
 
     q.join()
     
-    # stop workers
+    # Stop workers
     for i in range(NUM_THREADS):
         q.put(None)
     
+    # Stop threads
     for t in threads:
         t.join()
 
-    print("Iteration", count, "Complete. Time Elapsed: {}".format(time.time() - start))
+    print("Iteration", count,
+            "Complete. Time Elapsed: {:.3f} seconds".format(time.time() - start))
     
-    #Wait at least until the designated number of seconds allocated for each iteration has passed
+    #Wait at least until the designated number of seconds allocated
+    #for each iteration has passed
     while True:
         if (time.time() - iteration_start) >= SECONDS_PER_ITERATION:
             break
@@ -131,4 +164,4 @@ while True:
     
     count += 1
 
-print("Entire Job Took: {}".format(time.time() - start))
+print("Entire Job Took: {:.3f} seconds".format(time.time() - start))

@@ -3,6 +3,17 @@
 
 """
 Script for quickly seting up all the directories necessary for the data mining
+
+Structure:
+    src 
+        json_files
+            cryptocurrency1
+            cryptocurrency2
+            ...
+        tweets
+            cryptocurrency1
+            cryptocurrency2
+            ...
 """
 import os
 import path
