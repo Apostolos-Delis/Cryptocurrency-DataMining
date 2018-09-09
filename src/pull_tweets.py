@@ -95,13 +95,17 @@ def close_tweet_json(json_file):
     json_file.write("   ]\n}\n")
     json_file.close()
 
-def write_tweet_to_json(tweet: str, json_file: str, indent=2):
+def write_tweet_to_json(tweet: str, json_file: str, indent=2, comma=True):
     """
     TODO: WRite the documentation for the write_tweet_to_json
     """
     tab = "    "
+    if comma:
+        finish = ",\n"
+    else:
+        finish = "\n"
     json_file.write(indent * tab)
-    json_file.write(tweet)
+    json_file.write(tweet + finish)
     
 def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
                     verbose=False):
@@ -130,12 +134,17 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
     json_data = json.load(open(json_file_name, 'r'))
 
     #Construct formatted tweet data and write it in the tweet file
+    length = len(json_data['statuses'])
     for index, tweet in enumerate(json_data['statuses']):
+
+        # Ensures that the last tweet does not have a comma after it,
+        # following json formatting
+        comma = (index != (length - 1))
         jsonParser = JsonTweetParser(
             json_data['statuses'][index], time_str=time_str)
 
-        write_tweet_to_json(json.dumps(jsonParser.construct_tweet_json()) + ",\n",
-                tweet_file, indent=2)
+        write_tweet_to_json(json.dumps(jsonParser.construct_tweet_json()),
+                tweet_file, indent=2, comma=comma)
 
     close_tweet_json(tweet_file)
     
