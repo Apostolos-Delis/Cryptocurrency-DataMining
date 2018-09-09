@@ -12,24 +12,38 @@ if_exists(){
 }
 
 if_exists "pull_tweets.py"
-echo pull_tweets.py
-echo =============
-cat "pull_tweets.py" | grep --color="always" --line-number "TODO"
+output=$(cat "pull_tweets.py" | grep "TODO")
+if [[ ! -z $output ]];
+then
+    echo pull_tweets.py
+    echo =============
+    cat "pull_tweets.py" | grep --color="always" --line-number "TODO"
+fi
 
 if_exists "mkdirectories.py"
-echo mkdirectories.py
-echo =============
-cat "mkdirectories.py" | grep --color="always" --line-number "TODO"
+output=$(cat "mkdirectories.py" | grep "TODO")
+if [[ ! -z $output ]];
+then 
+    echo mkdirectories.py
+    echo =============
+    cat "mkdirectories.py" | grep --color="always" --line-number "TODO"
+fi
 
 if_exists "json_parser.py"
-echo json_parser.py
-echo =============
-cat "json_parser.py" | grep --color="always" --line-number "TODO"
-
+output=$(cat "json_parser.py" | grep "TODO")
+if [[ ! -z $output ]];
+then 
+    echo json_parser.py
+    echo =============
+    cat "json_parser.py" | grep --color="always" --line-number "TODO"
+fi
 
 if_exists "constants.py"
-echo constants.py
-echo =============
-cat "constants.py" | grep --color="always" --line-number "TODO"
-
+output=$(cat "constants.py" | grep "TODO")
+if [[ ! -z $output ]];
+then
+    echo constants.py
+    echo =============
+    cat "constants.py" | grep --color="always" --line-number "TODO"
+fi
 
