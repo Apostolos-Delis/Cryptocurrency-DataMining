@@ -18,12 +18,13 @@ import json
 import pprint
 import threading 
 import time
+import sys
 from queue import Queue
 
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
 from json_parser import JsonTweetParser
-from constants import JSON_DIR, TWEET_DIR, DATA_DIR
+from constants import JSON_DIR, TWEET_DIR, DATA_DIR, HASHTAGS
 
 # Variables that contains the user credentials to access Twitter API
 from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET 
@@ -42,41 +43,23 @@ try:
 except ImportError:
     import simplejson as json
     
-#Hashtags that will be searched for using the twitter api
-hashtags = [ "bitcoin", "ethereum", "litecoin", "ripple", "bcash", "eos",
-           "stellarlumens", "monero", "nano", "vechain"]
-
-NUM_THREADS = len(hashtags)
+NUM_THREADS = len(HASHTAGS)
 SECONDS_PER_ITERATION = 15
 NUM_TWEETS = 300
 
 twitter = Twitter(auth=oauth)
 
-json_file_name = "tmp/JSON_TEMP.json"
-
-"""
-raw_tweets = twitter.search.tweets(q="bitcoin",
-    result_type='recent', lang='en', count=10)
-
-file = open(json_file_name, "w+")
-file.write(json.dumps(raw_tweets, indent=10))
-file.close()
-
-json_data = json.load(open(json_file_name, 'r'))
-
-
-#Construct formatted tweet data and write it in the tweet file
-jsonParser = JsonTweetParser(
-     json_data["statuses"][0])
-
-print(str(jsonParser.construct_tweet_json(string_=True)) + ",\n")
-
-exit(0)
-"""
-
-print("Beginning to pull data...")
 
 print_lock = threading.Lock()
+
+def error(content, output_stream=sys.stderr, end='\n', interrupt=False):
+    """
+    TODO: add docstring for error
+    """
+    print("\033[31m" + str(content) + "\033[0m",
+            file=output_stream, end=end)
+    if interrupt:
+        exit(-1)
 
 def create_tweet_json(name: str):
     """
@@ -122,8 +105,15 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
     json_file_name =  os.path.join(os.path.join(JSON_DIR, hashtag), file_name)
     
     # Search for latest tweets about the hashtag currenty selected
-    raw_tweets = twitter.search.tweets(q=hashtag,
-        result_type='recent', lang='en', count=NUM_TWEETS)
+    try:
+        raw_tweets = twitter.search.tweets(q=hashtag,
+            result_type='recent', lang='en', count=NUM_TWEETS)
+    except TwitterHTTPError as err:
+        error(err, interrupt=True)
+
+    #Dump the raw json into a json file to be opened again later
+    #These files are not necessary to keep in the long run, but 
+    #Can be usefull to see all the raw, unformatted data
     file = open(json_file_name, "a+")
     file.write(json.dumps(raw_tweets, indent=10))
     file.close()
@@ -131,6 +121,7 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
     tweet_file = create_tweet_json(
             os.path.join(os.path.join(TWEET_DIR, hashtag), file_name))
 
+    #json_data is now a dict with the json content rather than a str
     json_data = json.load(open(json_file_name, 'r'))
 
     #Construct formatted tweet data and write it in the tweet file
@@ -148,9 +139,8 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
 
     close_tweet_json(tweet_file)
     
-    
-    with print_lock:
-        if verbose:
+    if verbose:
+        with print_lock:
             print(threading.current_thread().name, hashtag)
 
 def threader():
@@ -173,14 +163,14 @@ def threader():
 if os.path.isfile("mkdirectories.py"):
     os.system("./mkdirectories.py")
 else:
-    from sys import stderr
-    print("\033[31mERROR: mkdirectories.py is not in the current directory.\033[0m",
-         file=stderr)
-    exit(-1)
-
+    error("ERROR: mkdirectories.py is not in the current directory.",
+            interrupt=True)
 
 count = 1
 start = time.time()
+
+print("Beginning to pull data...")
+
 while True:
 
     iteration_start = time.time()
@@ -196,7 +186,7 @@ while True:
         t.start()
         
     # Add the hashtags to be searched into the queue
-    for worker in hashtags:
+    for worker in HASHTAGS:
         q.put(worker)
 
     q.join()
@@ -218,6 +208,7 @@ while True:
         if (time.time() - iteration_start) >= SECONDS_PER_ITERATION:
             break
 
+    #Get Rid of this in the final implementation
     if count == 100000000000:
         break
     

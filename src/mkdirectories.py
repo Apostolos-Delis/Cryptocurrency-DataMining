@@ -18,13 +18,13 @@ Structure:
 import os
 import path
 
-from constants import JSON_DIR, TWEET_DIR, DATA_DIR
+from constants import JSON_DIR, TWEET_DIR, DATA_DIR, HASHTAGS
 
 
 def make_directory(file_path: str):
     """
     Creates the directory at the path:
-    :param file_path: the path of the directory that you want ot create
+    :param file_path: the path of the directory that you want to create
     """
     if file_path == "\\":
         return 0
@@ -46,6 +46,6 @@ if __name__ == "__main__":
     hashtags = [ "bitcoin", "ethereum", "litecoin", "ripple", "bcash", "eos", "stellarlumens", 
         "monero", "nano", "vechain"]
 
-    for hashtag in hashtags: 
+    for hashtag in HASHTAGS: 
         make_directory(os.path.join(JSON_DIR, hashtag))
         make_directory(os.path.join(TWEET_DIR, hashtag))
