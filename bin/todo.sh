@@ -31,7 +31,7 @@ recursive=false
 ls_flags=""
 search_python=false
 
-DIR="."
+DIR="../src"
 
 while test $# -gt 0
 do 
@@ -79,7 +79,6 @@ done
 #Define what files will be searched through 
 if [ $recursive = true ]
 then 
-
     if [ $search_python = true ]
     then 
         search="$search $DIR/*.py $DIR/**/*.py"
@@ -89,6 +88,8 @@ then
 elif [ $search_python = true ]
 then 
     search="$search $DIR/*.py"
+else 
+    search="$search $DIR/*"
 fi
 
 #Define file array
