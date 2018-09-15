@@ -32,11 +32,7 @@ class JsonTweetParser:
         """
         :return: a list of the hashtags of a tweet
         """
-
-        hashtags = []
-        for i in self.tweet_json["entities"]['hashtags']:
-            hashtags.append(i['text'])
-        return hashtags
+        return [i["text"] for i in self.tweet_json["entities"]["hashtags"]]
 
     def get_date(self) -> str:
         """

@@ -21,6 +21,12 @@ import time
 import sys
 from queue import Queue
 
+# Import the necessary package to process data in JSON format
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
 from json_parser import JsonTweetParser
@@ -29,28 +35,11 @@ from constants import JSON_DIR, TWEET_DIR, DATA_DIR, HASHTAGS
 # Variables that contains the user credentials to access Twitter API
 from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET 
 
-oauth = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
-
-# Initiate the connection to Twitter Streaming API
-twitter_stream = TwitterStream(auth=oauth)
-
-# Get a sample of the public data following through Twitter
-iterator = twitter_stream.statuses.sample()
-
-# Import the necessary package to process data in JSON format
-try:
-    import json
-except ImportError:
-    import simplejson as json
-    
+        
 NUM_THREADS = len(HASHTAGS)
 SECONDS_PER_ITERATION = 15
 NUM_TWEETS = 300
 
-twitter = Twitter(auth=oauth)
-
-
-print_lock = threading.Lock()
 
 def error(content, *args, interrupt=False, **kwargs):
     """
@@ -64,7 +53,8 @@ def error(content, *args, interrupt=False, **kwargs):
 
 def create_tweet_json(name: str):
     """
-    TODO: Write documentation for create_tweet_json
+    Initializes a json file for tweets 
+    :param name: name of the json file to be created 
     """
     json_file = open(name, 'a')
     json_file.write("{\n")
@@ -144,7 +134,7 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
             json_data['statuses'][index], time_str=time_str)
 
         write_tweet_to_json(json.dumps(jsonParser.construct_tweet_json()),
-                tweet_file, indent=2, comma=comma)
+                            tweet_file, indent=2, comma=comma)
 
     close_tweet_json(tweet_file)
     
@@ -169,58 +159,71 @@ def threader():
         q.task_done()
 
 
-if os.path.isfile("mkdirectories.py"):
-    os.system("./mkdirectories.py")
-else:
-    error("ERROR: mkdirectories.py is not in the current directory.",
-            interrupt=True)
-
-count = 1
-start = time.time()
-
-print("Beginning to pull data...")
-
-while True:
-
-    iteration_start = time.time()
-    q = Queue()
-
-    # Initialize Threads
-    threads = []
-    for x in range(NUM_THREADS):
-        t = threading.Thread(target=threader)
-        t.daemon = True  
-        t.name = x
-        threads.append(t)
-        t.start()
-        
-    # Add the hashtags to be searched into the queue
-    for worker in HASHTAGS:
-        q.put(worker)
-
-    q.join()
+if __name__ == "__main__":
     
-    # Stop workers
-    for i in range(NUM_THREADS):
-        q.put(None)
+    oauth = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
     
-    # Stop threads
-    for t in threads:
-        t.join()
-
-    print("Iteration", count,
-            "Complete. Time Elapsed: {:.3f} seconds".format(time.time() - start))
+    # Initiate the connection to Twitter Streaming API
+    twitter_stream = TwitterStream(auth=oauth)
     
-    #Wait at least until the designated number of seconds allocated
-    #for each iteration has passed
+    # Get a sample of the public data following through Twitter
+    iterator = twitter_stream.statuses.sample()
+    twitter = Twitter(auth=oauth)
+    
+    print_lock = threading.Lock()
+    
+    # Generate data directory
+    if os.path.isfile("mkdirectories.py"):
+        os.system("./mkdirectories.py")
+    else:
+        error("ERROR: mkdirectories.py is not in the current directory.",
+                interrupt=True)
+    
+    count = 1
+    start = time.time()
+    print("Beginning to pull data...")
+    
     while True:
-        if (time.time() - iteration_start) >= SECONDS_PER_ITERATION:
-            break
-
-    #Get Rid of this in the final implementation
-    if count == 100000000000:
-        break
     
-    count += 1
-
-print("Entire Job Took: {:.3f} seconds".format(time.time() - start))
+        iteration_start = time.time()
+        q = Queue()
+    
+        # Initialize Threads
+        threads = []
+        for x in range(NUM_THREADS):
+            t = threading.Thread(target=threader)
+            t.daemon = True  
+            t.name = x
+            threads.append(t)
+            t.start()
+            
+        # Add the hashtags to be searched into the queue
+        for worker in HASHTAGS:
+            q.put(worker)
+    
+        q.join()
+        
+        # Stop workers
+        for i in range(NUM_THREADS):
+            q.put(None)
+        
+        # Stop threads
+        for t in threads:
+            t.join()
+    
+        print("Iteration", count,
+                "Complete. Time Elapsed: {:.3f} seconds".format(time.time() - start))
+        
+        #Wait at least until the designated number of seconds allocated
+        #for each iteration has passed
+        while True:
+            if (time.time() - iteration_start) >= SECONDS_PER_ITERATION:
+                break
+    
+        #Get Rid of this in the final implementation
+        if count == 100000000000:
+            break
+        
+        count += 1
+    
+    print("Entire Job Took: {:.3f} seconds".format(time.time() - start))
