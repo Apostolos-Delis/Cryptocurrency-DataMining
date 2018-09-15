@@ -52,12 +52,13 @@ twitter = Twitter(auth=oauth)
 
 print_lock = threading.Lock()
 
-def error(content, output_stream=sys.stderr, end='\n', interrupt=False):
+def error(content, *args, interrupt=False, **kwargs):
     """
-    TODO: add docstring for error
+    :param content: what you want to print to stderr
+    :interrupt: bool that will terminate program if yes
     """
     print("\033[31m" + str(content) + "\033[0m",
-            file=output_stream, end=end)
+          *args, file=sys.stderr, **kwargs)
     if interrupt:
         exit(-1)
 
@@ -73,14 +74,22 @@ def create_tweet_json(name: str):
 
 def close_tweet_json(json_file):
     """
-    TODO: WRite the documentation for the close_tweet_json
+    :param json_file file pointer that will be closed
     """
     json_file.write("   ]\n}\n")
     json_file.close()
 
 def write_tweet_to_json(tweet: str, json_file: str, indent=2, comma=True):
     """
-    TODO: WRite the documentation for the write_tweet_to_json
+    Writes a properly formatted tweet to the json file give
+    :param tweet: str of the tweet json 
+    :param json_file: file pointer that contains all the other tweets 
+    :param indent: the amount of tabs of indentation you want the tweet to 
+                   have in the json file
+    :param comma: bool determining if you want to have a comma to follow the 
+                  tweet in the json file. You want this to be True unless you
+                  are certain that this tweet will be the last one added to 
+                  the json file 
     """
     tab = "    "
     if comma:
