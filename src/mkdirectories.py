@@ -37,7 +37,11 @@ def make_directory(file_path: str):
             print("Error while attempting to create a directory.")
             exit(3)
 
-if __name__ == "__main__":
+def create_data_directory():
+    """
+    Creates all the files necessary for storing the json files
+
+    """
     
     make_directory(DATA_DIR)
     make_directory(JSON_DIR)
@@ -49,3 +53,7 @@ if __name__ == "__main__":
     for hashtag in HASHTAGS: 
         make_directory(os.path.join(JSON_DIR, hashtag))
         make_directory(os.path.join(TWEET_DIR, hashtag))
+
+
+if __name__ == "__main__":
+    create_data_directory()

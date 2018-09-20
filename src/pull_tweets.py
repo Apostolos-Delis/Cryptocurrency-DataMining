@@ -31,6 +31,7 @@ from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
 from json_parser import JSONTweetParser
 from constants import JSON_DIR, TWEET_DIR, DATA_DIR, HASHTAGS
+from mkdirectories import create_data_directory
 
 # Variables that contains the user credentials to access Twitter API
 from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET 
@@ -38,7 +39,7 @@ from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET
         
 NUM_THREADS = len(HASHTAGS)
 SECONDS_PER_ITERATION = 15
-NUM_TWEETS = 300
+NUM_TWEETS = 100
 
 
 def error(content, *args, interrupt=False, **kwargs):
@@ -170,14 +171,11 @@ if __name__ == "__main__":
     iterator = twitter_stream.statuses.sample()
     twitter = Twitter(auth=oauth)
     
+    #Lock for prining with threads
     print_lock = threading.Lock()
     
     # Generate data directory
-    if os.path.isfile("mkdirectories.py"):
-        os.system("./mkdirectories.py")
-    else:
-        error("ERROR: mkdirectories.py is not in the current directory.",
-                interrupt=True)
+    create_data_directory()
     
     count = 1
     start = time.time()

@@ -3,8 +3,6 @@
 """
 Class that correctly identifies the different components of a tweet and 
 assembles it into a dictionary to be added to a database.
-
-TODO: change the get_date() to actually pull data from the tweet rather than from the artificial time_str
 """
 import json
 from pprint import pprint

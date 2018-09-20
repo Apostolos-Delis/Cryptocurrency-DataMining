@@ -4,6 +4,7 @@
 **/api_keys.py
 **/json_files/
 **/tmp/
+**/temp.*
 **/data/
 
 build/
