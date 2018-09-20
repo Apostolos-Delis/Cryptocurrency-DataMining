@@ -22,4 +22,6 @@ pip install --upgrade pip
 #install the python twitter api
 pip install twitter
 
+#install Orator for sql data management
+pip install orator
 

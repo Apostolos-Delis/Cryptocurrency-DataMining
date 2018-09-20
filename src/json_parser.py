@@ -45,7 +45,8 @@ class JsonTweetParser:
 
     def get_userinfo(self) -> dict:
         """
-        TODO: Add get_userinfo info
+        :return dict containing all the different information about
+        the user who made the tweet
         """
         user = {
             "date_created": self.tweet_json['user']['created_at'],
@@ -60,7 +61,8 @@ class JsonTweetParser:
 
     def construct_tweet_json(self):
         """
-        TODO: Add Tweet JSon info
+        :return dict containing all the different information about
+        a certain tweet
         """
         tweet = {
             "id": self.get_tweetid(),
