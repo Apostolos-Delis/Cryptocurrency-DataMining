@@ -29,7 +29,7 @@ except ImportError:
 
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
-from json_parser import JsonTweetParser
+from json_parser import JSONTweetParser
 from constants import JSON_DIR, TWEET_DIR, DATA_DIR, HASHTAGS
 
 # Variables that contains the user credentials to access Twitter API
@@ -130,7 +130,7 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
         # Ensures that the last tweet does not have a comma after it,
         # following json formatting
         comma = (index != (length - 1))
-        jsonParser = JsonTweetParser(
+        jsonParser = JSONTweetParser(
             json_data['statuses'][index], time_str=time_str)
 
         write_tweet_to_json(json.dumps(jsonParser.construct_tweet_json()),
