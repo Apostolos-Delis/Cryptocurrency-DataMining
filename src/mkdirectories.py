@@ -16,7 +16,6 @@ Structure:
             ...
 """
 import os
-import path
 
 from constants import JSON_DIR, TWEET_DIR, DATA_DIR, HASHTAGS
 

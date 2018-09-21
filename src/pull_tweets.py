@@ -11,13 +11,15 @@ External Dependencies:
     the twitter api keys
     * file called mkdirectories.py which initializes the data directory 
     heirarchy
+    * file called api_keys.py containing the variables for twitter api 
+    authorization
+    * file called constants.py which contatins some of the constants shared
+    across this project
 """
 import time
 import os
 import json
-import pprint
-import threading 
-import time
+import threading
 import sys
 from queue import Queue
 
@@ -30,17 +32,17 @@ except ImportError:
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
 from json_parser import JSONTweetParser
-from constants import JSON_DIR, TWEET_DIR, DATA_DIR, HASHTAGS
+from constants import JSON_DIR, TWEET_DIR, HASHTAGS
 from mkdirectories import create_data_directory
 
 # Variables that contains the user credentials to access Twitter API
-from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET 
+from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET
 
-        
 NUM_THREADS = len(HASHTAGS)
 SECONDS_PER_ITERATION = 15
 NUM_TWEETS = 100
 
+NU
 
 def error(content, *args, interrupt=False, **kwargs):
     """
@@ -102,7 +104,7 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
     """
     
     file_name = hashtag + "_" + str(time_str) + ".json"
-    json_file_name =  os.path.join(os.path.join(JSON_DIR, hashtag), file_name)
+    json_file_name = os.path.join(os.path.join(JSON_DIR, hashtag), file_name)
     
     # Search for latest tweets about the hashtag currenty selected
     try:
@@ -168,7 +170,7 @@ if __name__ == "__main__":
     twitter_stream = TwitterStream(auth=oauth)
     
     # Get a sample of the public data following through Twitter
-    iterator = twitter_stream.statuses.sample()
+    # iterator = twitter_stream.statuses.sample()
     twitter = Twitter(auth=oauth)
     
     #Lock for prining with threads
