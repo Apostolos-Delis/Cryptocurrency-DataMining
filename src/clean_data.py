@@ -1,9 +1,16 @@
+#!/usr/bin/env python3
+# coding: utf8
+
+"""
+Functions related to cleaning data
+"""
 import re
 
 
-def clean_text_function(content):
+def clean_text_function(content: str) -> str:
     """
     This function takes text and cleans it according to Glove standards
+    :param content: str of the content that needs to be cleaned 
     :return: cleaned text
     """
 
@@ -127,10 +134,26 @@ def clean_text_function(content):
     return content.lower()
 
 
-def clean_text_for_tfidf(content):
-    # remove punctuation
+def clean_text_for_tfidf(content: str) -> str:
+    """
+    This does the same thing as clean text function but it 
+    also removes punctuation
+
+    :param content: str of the content that needs to be cleaned 
+    :return: cleaned text without any punctuation
+    """
     content = clean_text_function(content)
     content = re.sub('([.,!?()])', r'', content)
     content = re.sub(r' +', ' ', content)
 
     return content
+
+
+if __name__ == "__main__":
+    import json
+    FILE_NAME = "tmp/vechain_2018-09-15_09-46-32.json"
+
+    data = json.load(open(FILE_NAME, 'r'))
+    print(data["statuses"][0])
+
+    print(clean_text_function(str(data["statuses"][0])))
