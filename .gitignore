@@ -6,6 +6,8 @@
 **/tmp/
 **/temp.*
 **/data/
+**/.DS_Store
+
 
 build/
 dist/
