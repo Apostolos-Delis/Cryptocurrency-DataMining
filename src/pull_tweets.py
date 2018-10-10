@@ -42,7 +42,6 @@ NUM_THREADS = len(HASHTAGS)
 SECONDS_PER_ITERATION = 15
 NUM_TWEETS = 100
 
-NU
 
 def error(content, *args, interrupt=False, **kwargs):
     """

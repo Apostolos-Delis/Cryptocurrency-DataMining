@@ -7,7 +7,7 @@
 **/temp.*
 **/data/
 **/.DS_Store
-
+**/old_twitter_data/
 
 build/
 dist/

@@ -151,9 +151,9 @@ def clean_text_for_tfidf(content: str) -> str:
 
 if __name__ == "__main__":
     import json
-    FILE_NAME = "tmp/vechain_2018-09-15_09-46-32.json"
+    FILE_NAME = "tmp/ripple_2018-10-04_21-33-12.json"
 
     data = json.load(open(FILE_NAME, 'r'))
-    print(data["statuses"][0])
+    print("\033[31m", data["statuses"][0])
 
-    print(clean_text_function(str(data["statuses"][0])))
+    print("\33[33m", clean_text_function(str(data["statuses"][0])))

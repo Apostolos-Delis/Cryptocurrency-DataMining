@@ -25,3 +25,8 @@ pip install twitter
 #install Orator for sql data management
 pip install orator
 
+#install lxml
+pip install lxml
+
+#install Pyquery
+pip install pyquery

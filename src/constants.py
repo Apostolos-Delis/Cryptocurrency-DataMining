@@ -21,4 +21,3 @@ HASHTAGS = [
         "nano", 
         "vechain"
         ]
-
