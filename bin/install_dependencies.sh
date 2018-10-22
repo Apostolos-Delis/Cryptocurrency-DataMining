@@ -15,6 +15,11 @@
 #
 #   Fedora: sudo dnf install python3
 
+if [ "$(id -u)" -ne 0 ]; then
+        printf "\n\tThis requires sudo. Please run with sudo -H.\n"
+        printf "\tUSAGE: sudo -H ./install_dependencies.sh\n\n"
+        exit -1
+fi  
 
 errormsg(){
     >&2 echo -e "\e[31m$1\e[0m"
@@ -46,7 +51,7 @@ pip install pyquery
 command_exists docker
 
 while true; do
-    read -p "Docker Requires 4 gb to run a sql server. Have your docker preferences allowed for ths much memory? " yn
+    read -p "Docker Requires 4 gb to run a sql server. Have your docker preferences allowed for ths much memory? [Y/n] " yn
     case $yn in
         #install microsoft sql server for unix systems
         [Yy]* ) docker pull microsoft/mssql-server-linux; break;;
@@ -56,13 +61,21 @@ while true; do
 done
 
 
-#create an sql server
-docker run -d --name sql_server_demo -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=reallyStrongPwd123' -p 1433:1433 microsoft/mssql-server-linuxjkk
+SERVER=$(docker ps | grep "cryptocurrency_data")
+if [[ -z $SERVER ]]
+then
+    echo -n "Insert a password for sql server: " 
+    read -s PASSWORD
+    echo
+    #create an sql server
+    echo "Creating SQL server locally called cryptocurrency_data"
+    docker run -d --name cryptocurrency_data -e 'ACCEPT_EULA=Y' -e "SA_PASSWORD=$PASSWORD" -p 1433:1433 microsoft/mssql-server-linux
+fi
 
 command_exists npm
 
 #update npm
-npm install npm@latest -g
+sudo npm install npm@latest -g
 
 #install the sql command line interface
-npm install -g sql-cli
+sudo npm install -g sql-cli
