@@ -38,7 +38,7 @@ from mkdirectories import create_data_directory
 # Variables that contains the user credentials to access Twitter API
 from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET
 
-NUM_THREADS = len(HASHTAGS)
+NUM_THREADS = 12
 SECONDS_PER_ITERATION = 15
 NUM_TWEETS = 100
 
