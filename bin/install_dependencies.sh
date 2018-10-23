@@ -15,12 +15,6 @@
 #
 #   Fedora: sudo dnf install python3
 
-if [ "$(id -u)" -ne 0 ]; then
-        printf "\n\tThis requires sudo. Please run with sudo -H.\n"
-        printf "\tUSAGE: sudo -H ./install_dependencies.sh\n\n"
-        exit -1
-fi  
-
 errormsg(){
     >&2 echo -e "\e[31m$1\e[0m"
 }
@@ -30,6 +24,9 @@ command_exists(){
         errormsg "$1 needs to be installed. Aborting."; exit 1; 
     }
 }
+
+printf "NOTE: This script will require sudo to run\n"
+IFS= read -rsp 'Please your sudo password: ' password
 
 command_exists pip
 
@@ -75,7 +72,7 @@ fi
 command_exists npm
 
 #update npm
-sudo npm install npm@latest -g
+sudo -S npm install npm@latest -g <<<$password
 
 #install the sql command line interface
-sudo npm install -g sql-cli
+sudo -S npm install -g sql-cli <<<$password
