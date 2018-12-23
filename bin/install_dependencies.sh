@@ -76,3 +76,4 @@ sudo -S npm install npm@latest -g <<<$password
 
 #install the sql command line interface
 sudo -S npm install -g sql-cli <<<$password
+
