@@ -1,3 +1,4 @@
 twitter
 orator
 lxml
+mysql

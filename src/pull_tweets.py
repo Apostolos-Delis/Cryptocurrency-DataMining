@@ -104,6 +104,7 @@ def mine_tweet_data(hashtag: str, time_str=time.strftime("%Y-%m-%d_%H-%M-%S"),
     
     file_name = hashtag + "_" + str(time_str) + ".json"
     json_file_name = os.path.join(os.path.join(JSON_DIR, hashtag), file_name)
+
     
     # Search for latest tweets about the hashtag currenty selected
     try:
