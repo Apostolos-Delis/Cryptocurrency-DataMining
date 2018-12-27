@@ -33,7 +33,7 @@ class APIManager:
 
     def __init__(self):
         self._api_keys = Queue()
-        self._time = time.time() # Usefull for 
+        self._time = time.time()
         self._load_keys()
 
 
@@ -52,7 +52,6 @@ class APIManager:
         except json.decoder.JSONDecodeError:
             print("Error: Json file is not properly formatted!")
             exit(-1)
-
         for oath_tokens in key_json["keys"]:
             self._api_keys.put(oath_tokens)
 

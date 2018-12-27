@@ -6,12 +6,12 @@ import mysql.connector
 from hidden import DB_NAME, DB_HOST, DB_USERNAME, DB_PASSWORD
 
 
-class DatabaseManager:
+class DatabaseWrapper:
     """
     Class for a mysql wrapper in python.
     
     Usage:
-        >>> dbm = DatabaseManager()
+        >>> dbm = DatabaseWrapper()
         >>> dbm.show_tables()
         ... [table1, table2, ... ]
     """

@@ -2,9 +2,39 @@
 # coding: utf8
 
 """
-Functions related to cleaning data
+Code for several auxiliary functions 
+including ones for cleaning data
 """
+import os
 import re
+
+
+def make_directory(file_path: str):
+    """
+    Creates the directory at the path:
+    :param file_path: the path of the directory that you want to create
+    """
+    if file_path == "\\":
+        return 0
+    try:
+        os.makedirs(file_path, exist_ok=True)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(file_path):
+            pass
+        else:
+            print("Error while attempting to create a directory.")
+            exit(3)
+
+
+def error(content, *args, interrupt=False, **kwargs):
+    """
+    :param content: what you want to print to stderr
+    :interrupt: bool that will terminate program if yes
+    """
+    print("\033[31m" + str(content) + "\033[0m",
+          *args, file=sys.stderr, **kwargs)
+    if interrupt:
+        exit(-1)
 
 
 def clean_text_function(content: str) -> str:
@@ -150,10 +180,4 @@ def clean_text_for_tfidf(content: str) -> str:
 
 
 if __name__ == "__main__":
-    import json
-    FILE_NAME = "tmp/ripple_2018-10-04_21-33-12.json"
-
-    data = json.load(open(FILE_NAME, 'r'))
-    print("\033[31m", data["statuses"][0])
-
-    print("\33[33m", clean_text_function(str(data["statuses"][0])))
+    pass

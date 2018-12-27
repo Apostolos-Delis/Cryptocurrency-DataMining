@@ -36,7 +36,7 @@ from constants import JSON_DIR, TWEET_DIR, HASHTAGS
 from mkdirectories import create_data_directory
 
 # Variables that contains the user credentials to access Twitter API
-from api_keys import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET
+from hidden import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET
 
 NUM_THREADS = 12
 SECONDS_PER_ITERATION = 15
