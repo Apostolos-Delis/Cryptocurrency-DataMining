@@ -1,13 +1,15 @@
 **/__pycache__/
 *.py[cod]
 *$py.class
-**/api_keys.py
+**/api_keys.json
+**/hidden.py
 **/json_files/
 **/tmp/
 **/temp.*
 **/data/
 **/.DS_Store
 **/old_twitter_data/
+**/.idea/
 
 build/
 dist/
