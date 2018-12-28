@@ -62,6 +62,10 @@ class TweetManager:
 
 
     def _load_twitter_api(self):
+        """
+        Function to create a twitter api object using the next available
+        api key available
+        """
         key = self._api_manager.next_api_key()
 
         oauth = OAuth(key["ACCESS_TOKEN"],
@@ -72,7 +76,10 @@ class TweetManager:
         # Initiate the connection to Twitter Streaming API
         try:
             self._twitter = Twitter(auth=oauth)
-        except  
+        except Exception as e:
+            error(e)
+            exit(-1)
+
         
         
         
