@@ -32,8 +32,6 @@ except ImportError:
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
 from json_parser import JSONTweetParser
-from constants import JSON_DIR, TWEET_DIR, HASHTAGS
-from mkdirectories import create_data_directory
 
 # Variables that contains the user credentials to access Twitter API
 from hidden import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET

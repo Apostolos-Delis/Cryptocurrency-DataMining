@@ -20,17 +20,19 @@ class JSONTweetParser:
         self.tweet_json = tweet
         self.time_str = time_str
 
+
     def get_tweetid(self) -> int:
         """
         :return: the unique id of a tweet 
         """
         return self.tweet_json['id']
 
+
     def get_hashtags(self) -> list:
         """
         :return: a list of the hashtags of a tweet
         """
-        return [i["text"] for i in self.tweet_json["entities"]["hashtags"]]
+        return [tag["text"] for tag in self.tweet_json["entities"]["hashtags"]]
 
     def get_date(self) -> str:
         """
@@ -38,8 +40,10 @@ class JSONTweetParser:
         """
         return JSONTweetParser.format_time(self.tweet_json["created_at"])
 
+
     def get_retweets(self) -> int:
         return self.tweet_json['retweet_count']
+
 
     def get_userinfo(self) -> dict:
         """
@@ -54,9 +58,11 @@ class JSONTweetParser:
             "friends": self.tweet_json["user"]["friends_count"],
         }
         return user
+    
 
     def get_tweet(self) -> str:
         return self.tweet_json['text']
+
 
     def construct_tweet_json(self):
         """
@@ -73,17 +79,18 @@ class JSONTweetParser:
         }
         return tweet
 
+
     @staticmethod
     def format_time(date: str, separator='-') -> str:
         """
         Takes a string in the format of: "Fri Apr 25 10:43:41 +0000 2014" 
-        and returns it in a format of: 4-25-2014_10-43-41 
+        and returns it in a format of: 2014-4-25
 
         :param date: time str of the format: 
              WEEKDAY MONTH DAY TIME TIMEZONE YEAR
         :param separator: str that will separate the different components 
             of the date, default is '-' so the date is seperated in the 
-            format of month-day-year_hour-min-sec
+            format of year-month-day
         """
 
         month_to_digit = {
@@ -101,11 +108,8 @@ class JSONTweetParser:
                 "Dec": '12'
             }
 
-        _, month, day, time, _, year = date.split()
-        time = time.replace(':', separator)
-        date_list = [month_to_digit[month], day, '_'.join([year, time])]
-        
-        return separator.join(date_list)
+        _, month, day, _, _, year = date.split()
+        return separator.join([year, month, day])
 
 
 if __name__ == "__main__":
