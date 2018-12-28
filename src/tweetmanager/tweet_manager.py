@@ -29,27 +29,57 @@ try:
 except ImportError:
     import simplejson as json
 
-from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
+from twitter import Twitter, OAuth, TwitterHTTPError
 
 from json_parser import JSONTweetParser
-
-# Variables that contains the user credentials to access Twitter API
-from hidden import ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET
-
-NUM_THREADS = 12
-SECONDS_PER_ITERATION = 15
-NUM_TWEETS = 100
+from api_manager import APIManager 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utilities import error
 
 
-def error(content, *args, interrupt=False, **kwargs):
+
+class TweetManager:
     """
-    :param content: what you want to print to stderr
-    :interrupt: bool that will terminate program if yes
+    TODO: Write TweetManager Documentation
     """
-    print("\033[31m" + str(content) + "\033[0m",
-          *args, file=sys.stderr, **kwargs)
-    if interrupt:
-        exit(-1)
+    SECONDS_PER_ITERATION = 15
+
+
+    def __init__(self, cryptocurrencies, num_threads=12):
+        self.cryptocurrencies = cryptocurrencies
+        self.num_threads = num_threads
+
+        self._api_manager = APIManager()
+        self._twitter = None
+        
+        # Used for storing the all the tasks to complete when multithreading
+        self._queue = None
+        # Lock for prining with threads
+        print_lock = threading.Lock()
+
+        # Loads the self._twitter object using the first api key
+        self._load_twitter_api()
+
+
+    def _load_twitter_api(self):
+        key = self._api_manager.next_api_key()
+
+        oauth = OAuth(key["ACCESS_TOKEN"],
+                key["ACCESS_SECRET"], 
+                key["CONSUMER_KEY"], 
+                key["CONSUMER_SECRET"])
+        
+        # Initiate the connection to Twitter Streaming API
+        try:
+            self._twitter = Twitter(auth=oauth)
+        except  
+        
+        
+        
+
+
+        
+
 
 def create_tweet_json(name: str):
     """
@@ -161,18 +191,6 @@ def threader():
 
 
 if __name__ == "__main__":
-    
-    oauth = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
-    
-    # Initiate the connection to Twitter Streaming API
-    twitter_stream = TwitterStream(auth=oauth)
-    
-    # Get a sample of the public data following through Twitter
-    # iterator = twitter_stream.statuses.sample()
-    twitter = Twitter(auth=oauth)
-    
-    #Lock for prining with threads
-    print_lock = threading.Lock()
     
     # Generate data directory
     create_data_directory()

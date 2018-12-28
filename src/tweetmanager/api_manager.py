@@ -4,6 +4,12 @@
 from queue import Queue
 import json
 import time
+import sys
+import os
+
+# To allow importing from the parent directory
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utilities import error
 
 class APIManager:
     """
@@ -46,11 +52,11 @@ class APIManager:
             f = open("api_keys.json", 'r')
             key_json = json.load(f)
         except FileNotFoundError as e:
-            print(e)
-            print("Must Create a json file with api keys")
+            error(e)
+            error("Must Create a json file with api keys")
             exit(-1) 
         except json.decoder.JSONDecodeError:
-            print("Error: Json file is not properly formatted!")
+            error("Error: Json file is not properly formatted!")
             exit(-1)
         for oath_tokens in key_json["keys"]:
             self._api_keys.put(oath_tokens)
