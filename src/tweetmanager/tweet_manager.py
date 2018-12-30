@@ -55,7 +55,7 @@ class TweetManager:
         # Used for storing the all the tasks to complete when multithreading
         self._queue = None
         # Lock for prining with threads
-        print_lock = threading.Lock()
+        self._print_lock = threading.Lock()
 
         # Loads the self._twitter object using the first api key
         self._load_twitter_api()
@@ -172,7 +172,6 @@ class TweetManager:
             raw_tweets = self._twitter.search.tweets(q=hashtag,
                 result_type='recent', lang='en', count=num_tweets)
 
-
         # Dump the raw json into a json file to be opened again later
         # These files are not necessary to keep in the long run, but 
         # Can be usefull to see all the raw, unformatted data
@@ -181,7 +180,7 @@ class TweetManager:
         raw_json_file.close()
 
         tweet_file = create_tweet_json(
-                os.path.join(os.path.join(TWEET_DIR, hashtag), file_name))
+                os.path.join(TWEET_DIR, file_name))
 
         # json_data is now a dict with the json content rather than a str
         json_data = json.load(open(json_file_name, 'r'))
@@ -193,16 +192,14 @@ class TweetManager:
             # Ensures that the last tweet does not have a comma after it,
             # following json formatting
             comma = (index != (length - 1))
-            jsonParser = JSONTweetParser(
-                json_data['statuses'][index], time_str=time_str)
-
+            jsonParser = JSONTweetParser(json_data['statuses'][index], coin=hashtag)
             write_tweet_to_json(json.dumps(jsonParser.construct_tweet_json()),
                                 tweet_file, indent=2, comma=comma)
 
         close_tweet_json(tweet_file)
         
         if verbose:
-            with print_lock:
+            with self._print_lock:
                 print(threading.current_thread().name, hashtag)
 
 

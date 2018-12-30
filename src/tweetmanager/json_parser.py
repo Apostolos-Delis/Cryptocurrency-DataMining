@@ -5,20 +5,17 @@ Class that correctly identifies the different components of a tweet and
 assembles it into a dictionary to be added to a database.
 """
 import json
-from pprint import pprint
-import time
+from textblob import Textblob
 
 
 class JSONTweetParser:
 
-    def __init__(self, tweet: dict, 
-            time_str=time.strftime("%Y-%m-%d_%H-%M-%S")):
+    def __init__(self, tweet: dict, coin: str):
         """
         :param tweet: dict object as gathered from the twitter api
-        :param time_str: a string with the current time for reference
         """
         self.tweet_json = tweet
-        self.time_str = time_str
+        self.coin = coin
 
 
     def get_tweetid(self) -> int:
@@ -43,6 +40,10 @@ class JSONTweetParser:
 
     def get_retweets(self) -> int:
         return self.tweet_json['retweet_count']
+
+
+    def get_tweet_sentiment(self) -> float:
+
 
 
     def get_userinfo(self) -> dict:
@@ -75,7 +76,8 @@ class JSONTweetParser:
             "hashtags": self.get_hashtags(),
             "date": self.get_date(),
             "retweets": self.get_retweets(),
-            "user": self.get_userinfo()
+            "user": self.get_userinfo(),
+            "coin": self.coin
         }
         return tweet
 
