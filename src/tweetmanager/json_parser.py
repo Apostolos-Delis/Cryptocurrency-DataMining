@@ -6,6 +6,8 @@ Class that correctly identifies the different components of a tweet and
 assembles it into a dictionary to be added to a database.
 """
 import json
+import sys
+import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utilities import text_sentiment
 
@@ -45,8 +47,7 @@ class JSONTweetParser:
 
 
     def get_tweet_sentiment(self) -> float:
-        pass
-
+        return text_sentiment(self.get_tweet())
 
     def get_userinfo(self) -> dict:
         """
@@ -79,7 +80,8 @@ class JSONTweetParser:
             "date": self.get_date(),
             "retweets": self.get_retweets(),
             "user": self.get_userinfo(),
-            "coin": self.coin
+            "coin": self.coin,
+            "sentiment": self.get_tweet_sentiment(),
         }
         return tweet
 

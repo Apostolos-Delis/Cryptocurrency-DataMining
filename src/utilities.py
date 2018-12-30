@@ -7,7 +7,7 @@ including ones for cleaning data
 """
 import os
 import re
-from textblob import Textblob
+from textblob import TextBlob
 
 
 def make_directory(file_path: str):
