@@ -66,7 +66,7 @@ class APIManager:
         if self._api_keys.empty():
             print("Exhausted all api keys, must wait till its refreshed...")
             while True:
-                if (time.time() - self._time) >= TWITTER_API_RESET_TIME:
+                if (time.time() - self._time) >= APIManager.TWITTER_API_RESET_TIME: 
                     break
             # Reload all the api keys
             self._load_keys()
@@ -75,3 +75,4 @@ class APIManager:
 
 if __name__ == "__main__":
     pass
+

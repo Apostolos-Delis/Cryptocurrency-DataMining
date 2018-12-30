@@ -6,8 +6,8 @@ Universal constants for python scripts
 
 #Data direcory related constants
 DATA_DIR = "data"
-JSON_DIR = "data/json_files"
-TWEET_DIR = "data/tweets"
+JSON_DIR = "json_files"
+TWEET_DIR = "tweets"
 
 HASHTAGS = [
         "bitcoin",
