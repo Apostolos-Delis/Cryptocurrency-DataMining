@@ -7,6 +7,7 @@ including ones for cleaning data
 """
 import os
 import re
+from textblob import Textblob
 
 
 def make_directory(file_path: str):
@@ -35,6 +36,19 @@ def error(content, *args, interrupt=False, **kwargs):
           *args, file=sys.stderr, **kwargs)
     if interrupt:
         exit(-1)
+
+
+def text_sentiment(content: str) -> float:
+    """
+    Runs sentiment analysis on the text contnent and returns a value 
+    from -1 to 1 where 1 is the most positive, -1 is the most negative
+
+    :param content: str of the data to convert
+    """
+
+    content = clean_text_for_tfidf(content)
+    analysis = TextBlob(content)
+    return analysis.sentiment.polarity
 
 
 def clean_text_function(content: str) -> str:

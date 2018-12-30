@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # coding: utf8
 
 """
@@ -5,7 +6,8 @@ Class that correctly identifies the different components of a tweet and
 assembles it into a dictionary to be added to a database.
 """
 import json
-from textblob import Textblob
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utilities import text_sentiment
 
 
 class JSONTweetParser:
@@ -43,7 +45,7 @@ class JSONTweetParser:
 
 
     def get_tweet_sentiment(self) -> float:
-
+        pass
 
 
     def get_userinfo(self) -> dict:
