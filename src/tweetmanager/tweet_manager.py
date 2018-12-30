@@ -143,7 +143,7 @@ class TweetManager:
             if hashtag is None:
                 break
             
-            self._mine_tweet_data(hashtag, num_tweets)
+            self._mine_tweet_data(hashtag, num_tweets=num_tweets)
             self._queue.task_done()
 
 
@@ -176,7 +176,7 @@ class TweetManager:
         # These files are not necessary to keep in the long run, but 
         # Can be usefull to see all the raw, unformatted data
         raw_json_file = open(json_file_name, "w")
-        raw_json_file.write(json.dumps(raw_tweets, indent=10))
+        raw_json_file.write(json.dumps(raw_tweets, indent=2))
         raw_json_file.close()
 
         tweet_file = create_tweet_json(
