@@ -42,7 +42,7 @@ class TweetManager:
     """
     TODO: Write TweetManager Documentation
     """
-    SECONDS_PER_ITERATION = 15
+    SECONDS_PER_ITERATION = 5
 
 
     def __init__(self, cryptocurrencies, num_threads=12):
@@ -105,7 +105,7 @@ class TweetManager:
             #Wait at least until the designated number of seconds allocated
             #for each iteration has passed
             while True and num_tweets_per_coin != 0:
-                if (time.time() - iteration_start) >= TwitterManager.SECONDS_PER_ITERATION:
+                if (time.time() - iteration_start) >= TweetManager.SECONDS_PER_ITERATION:
                     break
         
         print("Entire Job Took: {:.3f} seconds".format(time.time() - start))
@@ -245,4 +245,4 @@ def write_tweet_to_json(tweet: str, json_file: str, indent=2, comma=True):
 if __name__ == "__main__":
     coins = ["vechain", "bitcoin"]
     tweets = TweetManager(coins, num_threads=12)
-    tweets.get_tweets(200)
+    tweets.get_tweets(201)
