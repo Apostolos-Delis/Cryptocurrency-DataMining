@@ -42,7 +42,7 @@ class TweetManager:
     """
     TODO: Write TweetManager Documentation
     """
-    SECONDS_PER_ITERATION = 5
+    SECONDS_PER_ITERATION = 0.1
 
 
     def __init__(self, cryptocurrencies, num_threads=12):
@@ -51,6 +51,9 @@ class TweetManager:
 
         self._api_manager = APIManager()
         self._twitter = None
+        
+        # This is used for get_tweets()
+        self._tweets = list()
         
         # Used for storing the all the tasks to complete when multithreading
         self._queue = None
@@ -69,7 +72,9 @@ class TweetManager:
 
         start = time.time()
         print("Beginning to pull data...")
-        
+        print("Coins:", self.cryptocurrencies)
+
+        self._tweets = list()
         while num_tweets_per_coin > 0:
             iteration_start = time.time()
             num_tweets_to_pull = min(num_tweets_per_coin, 200)
@@ -100,7 +105,7 @@ class TweetManager:
         
             num_tweets_per_coin -= num_tweets_to_pull
             print("Num Tweets remaining: {0}".format(num_tweets_per_coin))
-            print("Time Elapsed: {:.3f} seconds\n".format(time.time() - start))
+            print("Time Elapsed: {:.3f} seconds\n".format(time.time() - iteration_start))
             
             #Wait at least until the designated number of seconds allocated
             #for each iteration has passed
@@ -109,6 +114,7 @@ class TweetManager:
                     break
         
         print("Entire Job Took: {:.3f} seconds".format(time.time() - start))
+        return self._tweets
 
 
     def _load_twitter_api(self):
@@ -137,12 +143,9 @@ class TweetManager:
         hashtags to mine.
         """
         while True:
-            
             hashtag = self._queue.get()
-            
             if hashtag is None:
                 break
-            
             self._mine_tweet_data(hashtag, num_tweets=num_tweets)
             self._queue.task_done()
 
@@ -153,54 +156,34 @@ class TweetManager:
         and creates a file with the cleaned out tweets
         
         :param hashtag: str containing the hashtag that will be searched
-        :param time_str: str showing the time of when the data was pulled
         :param verbose: bool to toggle printing the thread and hashtag
+        :param num_tweets: int of how many tweets to pull from twitter
         """
-        
-        file_name = hashtag + ".json"
-        json_file_name = os.path.join(JSON_DIR, file_name)
-
-        make_directory(JSON_DIR)
-        make_directory(TWEET_DIR)
-        
         # Search for latest tweets about the hashtag currenty selected
-        try:
-            raw_tweets = self._twitter.search.tweets(q=hashtag,
-                result_type='recent', lang='en', count=num_tweets)
-        except TwitterHTTPError as err:
-            self._load_twitter_api()
-            raw_tweets = self._twitter.search.tweets(q=hashtag,
-                result_type='recent', lang='en', count=num_tweets)
+        while num_tweets > 0:
+            try:
+                raw_tweets = self._twitter.search.tweets(q=hashtag,
+                    result_type='recent', lang='en', count=num_tweets)
+            except TwitterHTTPError as err:
+                print("Switching Api Key")
+                self._load_twitter_api()
+                raw_tweets = self._twitter.search.tweets(q=hashtag,
+                    result_type='recent', lang='en', count=num_tweets)
 
-        # Dump the raw json into a json file to be opened again later
-        # These files are not necessary to keep in the long run, but 
-        # Can be usefull to see all the raw, unformatted data
-        raw_json_file = open(json_file_name, "w")
-        raw_json_file.write(json.dumps(raw_tweets, indent=2))
-        raw_json_file.close()
+            # Construct formatted tweet data and append it to the list of clean_tweets
+            length = len(raw_tweets['statuses'])
+            num_tweets -= length
+            clean_tweets = list()
+            for index, tweet in enumerate(raw_tweets['statuses']):
+                jsonParser = JSONTweetParser(raw_tweets['statuses'][index], coin=hashtag)
+                clean_tweets.append(jsonParser.construct_tweet_json())
 
-        tweet_file = create_tweet_json(
-                os.path.join(TWEET_DIR, file_name))
-
-        # json_data is now a dict with the json content rather than a str
-        json_data = json.load(open(json_file_name, 'r'))
-
-        # Construct formatted tweet data and write it in the tweet file
-        length = len(json_data['statuses'])
-        for index, tweet in enumerate(json_data['statuses']):
-
-            # Ensures that the last tweet does not have a comma after it,
-            # following json formatting
-            comma = (index != (length - 1))
-            jsonParser = JSONTweetParser(json_data['statuses'][index], coin=hashtag)
-            write_tweet_to_json(json.dumps(jsonParser.construct_tweet_json()),
-                                tweet_file, indent=2, comma=comma)
-
-        close_tweet_json(tweet_file)
-        
-        if verbose:
             with self._print_lock:
-                print(threading.current_thread().name, hashtag)
+                for tweet in clean_tweets:
+                    self._tweets.append(tweet)
+                # self._tweets = self._tweets + clean_tweets
+                if verbose:
+                    print("Mine Tweet Data call, got", length, "tweets for", hashtag)
 
 
 def create_tweet_json(name: str):
@@ -243,6 +226,9 @@ def write_tweet_to_json(tweet: str, json_file: str, indent=2, comma=True):
 
     
 if __name__ == "__main__":
-    coins = ["vechain", "bitcoin"]
-    tweets = TweetManager(coins, num_threads=12)
-    tweets.get_tweets(201)
+    coins = ["ethereum", "meme"]
+    tweets = TweetManager(coins, num_threads=2)
+    tweet_list =  tweets.get_tweets(301)
+    print(len(tweet_list))
+    # print(tweet_list)
+
