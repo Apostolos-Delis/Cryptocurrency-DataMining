@@ -74,7 +74,7 @@ def get_bars(symbol: str, interval = '1d'):
                     'open', 'high', 'low', 'close', 'volume',
                     'close_time', 'quote_asset_vol', 'num_trades',
                     'taker_base_vol', 'taker_quote_vol', 'ignore']
-    df.index = [str(dt.datetime.fromtimestamp(x/1000.0)) for x in df.close_time]
+    df.index = [str(dt.datetime.fromtimestamp(x/1000.0)).split()[0] for x in df.close_time]
     return df
 
 

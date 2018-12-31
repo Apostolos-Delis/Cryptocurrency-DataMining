@@ -26,21 +26,28 @@ class Cryptocurrency:
         """
         Returns dictionary containing the current coin's price data
         """
-        open_time = " 15:59:59.999000"
+        # open_time = " 15:59:59.999000"
         today = datetime.today().strftime('%Y-%m-%d')
-        index = today + open_time
+        index = today 
+
+        # Pair data returns the prices of btc in usdt so that altcoins 
+        # can have their data in usdt rather than btc
+        pair_data = get_bars("BTCUSDT", interval="1d")
+
         if self.ticker == "BTC":
             pairing = "BTCUSDT"
+            for key in pair_data.keys():
+                pair_data[key] = 1
         else:
             pairing = self.ticker + "BTC"
 
         data = get_bars(pairing, interval="1d")
 
         todays_data = {
-                "open": data.loc[index]["open"],
-                "high": data.loc[index]["high"],
-                "low": data.loc[index]["low"],
-                "close": data.loc[index]["close"],
+                "open": float(data.loc[index]["open"]) * float(pair_data.loc[index]["open"]),
+                "high": float(data.loc[index]["high"]) * float(pair_data.loc[index]["high"]),
+                "low": float(data.loc[index]["low"]) * float(pair_data.loc[index]["low"]),
+                "close": float(data.loc[index]["close"]) * float(pair_data.loc[index]["close"]),
                 "volume": data.loc[index]["volume"],
                 "num_trades": data.loc[index]["num_trades"]
         }

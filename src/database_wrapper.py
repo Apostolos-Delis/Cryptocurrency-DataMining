@@ -11,8 +11,8 @@ class DatabaseWrapper:
     Class for a mysql wrapper in python.
     
     Usage:
-        >>> dbm = DatabaseWrapper()
-        >>> dbm.show_tables()
+        >>> dbw = DatabaseWrapper()
+        >>> dbw.show_tables()
         ... [table1, table2, ... ]
     """
 
@@ -33,7 +33,7 @@ class DatabaseWrapper:
         :param table_name: str containing the name of the table
         :param schema: dict containing the structure of the table, an example
                        of a table containing student ids and their names would be:
-                       {"name": "VARCHAR(255), "id": "INTEGER"}
+                       {"name": "VARCHAR(255)", "id": "INTEGER PRIMARY KEY"}
         """
         if not isinstance(schema, dict):
             raise TypeError("The table schema must be a dictionary")
