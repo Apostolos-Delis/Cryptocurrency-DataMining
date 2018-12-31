@@ -35,19 +35,22 @@ from json_parser import JSONTweetParser
 from api_manager import APIManager 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utilities import error, make_directory
-from constants import JSON_DIR, TWEET_DIR
+from constants import JSON_DIR, TWEET_DIR, HASHTAGS
 
 
 class TweetManager:
     """
     TODO: Write TweetManager Documentation
     """
-    SECONDS_PER_ITERATION = 0.1
+    SECONDS_PER_ITERATION = 5
 
 
     def __init__(self, cryptocurrencies, num_threads=12):
+        if not isinstance(cryptocurrencies, list):
+            raise TypeError("Cryptocurrencies must be of type 'list'")
+
         self.cryptocurrencies = cryptocurrencies
-        self.num_threads = num_threads
+        self.num_threads = min(num_threads, len(cryptocurrencies))
 
         self._api_manager = APIManager()
         self._twitter = None
@@ -58,13 +61,21 @@ class TweetManager:
         # Used for storing the all the tasks to complete when multithreading
         self._queue = None
         # Lock for prining with threads
-        self._print_lock = threading.Lock()
+        self._lock = threading.Lock()
+        self._threads = list()
 
         # Loads the self._twitter object using the first api key
-        self._load_twitter_api()
+        while True:
+            self._load_twitter_api()
+            try: 
+                raw_tweets = self._twitter.search.tweets(q="test",
+                    result_type='recent', lang='en', count=1)
+                break
+            except TwitterHTTPError as e:
+                continue
 
 
-    def get_tweets(self, num_tweets_per_coin=200):
+    def get_tweets(self, num_tweets_per_coin=200, verbose=False):
         """
         TODO: Write get_tweets
         NOTE: make this return a generator?
@@ -81,12 +92,13 @@ class TweetManager:
             self._queue = Queue()
         
             # Initialize Threads
-            threads = []
+            self._threads = []
             for x in range(self.num_threads):
-                t = threading.Thread(target=self._threader, args=(num_tweets_to_pull,))
+                t = threading.Thread(target=self._threader, 
+                        args=(num_tweets_to_pull, verbose))
                 t.daemon = True  
                 t.name = x
-                threads.append(t)
+                self._threads.append(t)
                 t.start()
                 
             # Add the hashtags to be searched into the queue
@@ -100,7 +112,7 @@ class TweetManager:
                 self._queue.put(None)
             
             # Stop threads
-            for t in threads:
+            for t in self._threads:
                 t.join()
         
             num_tweets_per_coin -= num_tweets_to_pull
@@ -137,7 +149,7 @@ class TweetManager:
             exit(-1)
 
         
-    def _threader(self, num_tweets):
+    def _threader(self, num_tweets, verbose):
         """ 
         Main multithreading function for each thread that looks for available
         hashtags to mine.
@@ -146,7 +158,8 @@ class TweetManager:
             hashtag = self._queue.get()
             if hashtag is None:
                 break
-            self._mine_tweet_data(hashtag, num_tweets=num_tweets)
+            self._mine_tweet_data(hashtag, num_tweets=num_tweets,
+                    verbose=verbose)
             self._queue.task_done()
 
 
@@ -160,75 +173,39 @@ class TweetManager:
         :param num_tweets: int of how many tweets to pull from twitter
         """
         # Search for latest tweets about the hashtag currenty selected
-        while num_tweets > 0:
+        with self._lock:
             try:
                 raw_tweets = self._twitter.search.tweets(q=hashtag,
                     result_type='recent', lang='en', count=num_tweets)
             except TwitterHTTPError as err:
-                print("Switching Api Key")
+                print("Switching api key, number of keys left:",
+                        self._api_manager.remaining_api_keys())
                 self._load_twitter_api()
                 raw_tweets = self._twitter.search.tweets(q=hashtag,
                     result_type='recent', lang='en', count=num_tweets)
+            except:
+                print(e)
+                exit(-1)
 
-            # Construct formatted tweet data and append it to the list of clean_tweets
-            length = len(raw_tweets['statuses'])
-            num_tweets -= length
-            clean_tweets = list()
-            for index, tweet in enumerate(raw_tweets['statuses']):
-                jsonParser = JSONTweetParser(raw_tweets['statuses'][index], coin=hashtag)
-                clean_tweets.append(jsonParser.construct_tweet_json())
+        # Construct formatted tweet data and append it to the list of clean_tweets
+        length = len(raw_tweets['statuses'])
+        num_tweets -= length
+        clean_tweets = list()
+        for index, tweet in enumerate(raw_tweets['statuses']):
+            jsonParser = JSONTweetParser(raw_tweets['statuses'][index], coin=hashtag)
+            clean_tweets.append(jsonParser.construct_tweet_json())
 
-            with self._print_lock:
-                for tweet in clean_tweets:
-                    self._tweets.append(tweet)
-                # self._tweets = self._tweets + clean_tweets
-                if verbose:
-                    print("Mine Tweet Data call, got", length, "tweets for", hashtag)
+        with self._lock:
+            # for tweet in clean_tweets:
+                # self._tweets.append(tweet)
+            self._tweets = self._tweets + clean_tweets
+            if verbose:
+                print("Mine Tweet Data call, got", length, "tweets for", hashtag)
 
 
-def create_tweet_json(name: str):
-    """
-    Initializes a json file for tweets 
-    :param name: name of the json file to be created 
-    """
-    json_file = open(name, 'w')
-    json_file.write("{\n")
-    json_file.write("    \"tweets\": [\n")
-    
-    return json_file 
-
-def close_tweet_json(json_file):
-    """
-    :param json_file file pointer that will be closed
-    """
-    json_file.write("   ]\n}\n")
-    json_file.close()
-
-def write_tweet_to_json(tweet: str, json_file: str, indent=2, comma=True):
-    """
-    Writes a properly formatted tweet to the json file give
-    :param tweet: str of the tweet json 
-    :param json_file: file pointer that contains all the other tweets 
-    :param indent: the amount of tabs of indentation you want the tweet to 
-                   have in the json file
-    :param comma: bool determining if you want to have a comma to follow the 
-                  tweet in the json file. You want this to be True unless you
-                  are certain that this tweet will be the last one added to 
-                  the json file 
-    """
-    tab = "    "
-    if comma:
-        finish = ",\n"
-    else:
-        finish = "\n"
-    json_file.write(indent * tab)
-    json_file.write(tweet + finish)
-
-    
 if __name__ == "__main__":
     coins = ["ethereum", "meme"]
-    tweets = TweetManager(coins, num_threads=2)
-    tweet_list =  tweets.get_tweets(301)
-    print(len(tweet_list))
+    tweets = TweetManager(HASHTAGS, num_threads=10)
+    tweet_list =  tweets.get_tweets(100, verbose=True)
+    print("length:", len(tweet_list))
     # print(tweet_list)
-

@@ -7,6 +7,8 @@ including ones for cleaning data
 """
 import os
 import re
+import sys
+
 from textblob import TextBlob
 
 
