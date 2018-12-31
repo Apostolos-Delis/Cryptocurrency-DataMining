@@ -97,6 +97,7 @@ class TweetManager:
         for coin in self.cryptocurrencies:
             print(coin)
 
+        print()    
         self._tweets = list()
         while num_tweets_per_coin > 0:
             iteration_start = time.time()
@@ -190,8 +191,7 @@ class TweetManager:
 
         length = len(raw_tweets['statuses'])
         num_tweets -= length
-        with self._lock:
-            print(hashtag.name, ":", num_tweets)
+
         # Construct formatted tweet data and append it to the list of clean_tweets
         clean_tweets = list()
         for index, tweet in enumerate(raw_tweets['statuses']):
@@ -204,7 +204,7 @@ class TweetManager:
 
         length += len(raw_tweets["statuses"])
         for index, tweet in enumerate(raw_tweets['statuses']):
-            jsonParser = JSONTweetParser(raw_tweets['statuses'][index], coin=hashtag.ticker)
+            jsonParser = JSONTweetParser(raw_tweets['statuses'][index], coin=hashtag.name)
             clean_tweets.append(jsonParser.construct_tweet_json())
 
         with self._lock:
@@ -220,7 +220,7 @@ class TweetManager:
         :param num_tweets: int of max number of tweets to search
         """
         if num_tweets == 0:
-            return dict()
+            return {"statuses": []}
         try:
             raw_tweets = self._twitter.search.tweets(q=query,
                 result_type='recent', lang='en', count=num_tweets)
@@ -237,10 +237,10 @@ class TweetManager:
 
 
 if __name__ == "__main__":
-    eth = Cryptocurrency("Ethereum", "eth", "date", [])
-    btc = Cryptocurrency("Bitcoin", "btc", "Date", [])
+    eth = Cryptocurrency("Ethereum", "eth")
+    btc = Cryptocurrency("Bitcoin", "btc")
     coins = [eth, btc]
-    tweets = TweetManager(coins, num_threads=10)
+    tweets = TweetManager(coins, num_threads=2)
     tweet_list =  tweets.get_tweets(100, verbose=True)
     print("length:", len(tweet_list))
     # print(tweet_list)
