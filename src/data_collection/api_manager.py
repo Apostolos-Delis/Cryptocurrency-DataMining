@@ -8,8 +8,9 @@ import sys
 import os
 
 # To allow importing from the parent directory
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utilities import error
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from .utilities import error
 
 class APIManager:
     """
@@ -48,8 +49,11 @@ class APIManager:
 
 
     def _load_keys(self):
+        """Loads the api keys into the queue."""
+        cur_path = os.path.dirname(__file__)
+        file_name = os.path.join(cur_path, "api_keys.json")
         try:
-            f = open("api_keys.json", 'r')
+            f = open(file_name, 'r')
             key_json = json.load(f)
         except FileNotFoundError as e:
             error(e)

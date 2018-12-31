@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 import pandas as pd
 
-from utilities import get_bars
+from .utilities import get_bars
 
 class Cryptocurrency:
 

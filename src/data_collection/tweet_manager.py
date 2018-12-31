@@ -29,11 +29,12 @@ except ImportError:
 
 from twitter import Twitter, OAuth, TwitterHTTPError
 
-from json_parser import JSONTweetParser
-from api_manager import APIManager 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utilities import error, make_directory
-from cryptocurrency import Cryptocurrency
+from .json_parser import JSONTweetParser
+from .api_manager import APIManager 
+from .utilities import error
+# sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from .cryptocurrency import Cryptocurrency
 
 
 class TweetManager:
