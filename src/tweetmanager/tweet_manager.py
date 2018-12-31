@@ -9,9 +9,7 @@ External Dependencies:
     * twitter api installed for python "pip install twitter"
     * file called api_keys.py containing the four different str constants for 
     the twitter api keys
-    * file called mkdirectories.py which initializes the data directory 
-    heirarchy
-    * file called api_keys.py containing the variables for twitter api 
+    * file called api_keys.json containing the variables for twitter api 
     authorization
     * file called constants.py which contatins some of the constants shared
     across this project
@@ -35,12 +33,16 @@ from json_parser import JSONTweetParser
 from api_manager import APIManager 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utilities import error, make_directory
-from constants import JSON_DIR, TWEET_DIR, HASHTAGS
 
 
 class TweetManager:
     """
-    TODO: Write TweetManager Documentation
+    class for handling all interactions with the twitter api. 
+    Usage: 
+        >>> coins = ["bitcoin", "ethereum"]
+        >>> tweet_manager = TweetManager(coins, num_threads=2)
+        >>> tweet_manager.get_tweets(num_tweets_per_coin=2)
+        ... [{<tweet_1_info>}, {...}] 
     """
     SECONDS_PER_ITERATION = 5
 
@@ -64,7 +66,7 @@ class TweetManager:
         self._lock = threading.Lock()
         self._threads = list()
 
-        # Loads the self._twitter object using the first api key
+        # Loads the self._twitter object using the first api key that is functional
         while True:
             self._load_twitter_api()
             try: 
@@ -77,10 +79,14 @@ class TweetManager:
 
     def get_tweets(self, num_tweets_per_coin=200, verbose=False):
         """
-        TODO: Write get_tweets
-        NOTE: make this return a generator?
-        """
+        Returns a list of dicts where each dict contains all the information
+        regarding a specific tweet, look at json_parser.py for more information
 
+        :param num_tweets_per_coin: The maximum number of tweets that will be pulled
+                                    from twitter (per coin), note that the limit will 
+                                    not always be reached; around 95% of this number will.
+        :param verbose: bool for whether to display more in-progress information
+        """
         start = time.time()
         print("Beginning to pull data...")
         print("Coins:", self.cryptocurrencies)
@@ -196,8 +202,6 @@ class TweetManager:
             clean_tweets.append(jsonParser.construct_tweet_json())
 
         with self._lock:
-            # for tweet in clean_tweets:
-                # self._tweets.append(tweet)
             self._tweets = self._tweets + clean_tweets
             if verbose:
                 print("Mine Tweet Data call, got", length, "tweets for", hashtag)
