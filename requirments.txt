@@ -1,5 +1,6 @@
 twitter
-orator
-lxml
 mysql
 textblob
+requests
+numpy
+pandas

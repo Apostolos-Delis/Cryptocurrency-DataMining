@@ -4,10 +4,10 @@
 Universal constants for python scripts
 """
 
-#Data direcory related constants
+# Data direcory related constants
 DATA_DIR = "data"
-JSON_DIR = "json_files"
-TWEET_DIR = "tweets"
+
+
 
 HASHTAGS = [
         "bitcoin",

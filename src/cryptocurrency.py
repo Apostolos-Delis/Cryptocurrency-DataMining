@@ -3,22 +3,18 @@
 
 
 import os
-import pickle
 from datetime import datetime
-
-import numpy as np
 import pandas as pd
-import quandl
 
+from utilities import get_bars
 
 class Cryptocurrency:
 
     def __init__(self, name: str, ticker: str, 
-            date_founded: str, exchanges: list):
+            date_founded: str = "2008-10-31"):
         self.name = name
         self.ticker = ticker.upper()
         self.date_founded = date_founded
-        self.exchanges = exchanges
 
 
     def __str__(self):
@@ -26,40 +22,31 @@ class Cryptocurrency:
                 f"({self.ticker}) at location <{hex(id(self))}>")
 
 
-    def get_market_data(self):
+    def current_market_data(self):
         """
-        TODO: Implement Get market Data
+        Returns dictionary containing the current coin's price data
         """
-        exchange_data = {}
+        open_time = " 15:59:59.999000"
+        today = datetime.today().strftime('%Y-%m-%d')
+        index = today + open_time
+        if self.ticker == "BTC":
+            pairing = "BTCUSDT"
+        else:
+            pairing = self.ticker + "BTC"
 
-        btc_usd_price_kraken = get_quandl_data('BCHARTS/KRAKENUSD')
-        exchange_data['KRAKEN'] = btc_usd_price_kraken
+        data = get_bars(pairing, interval="1d")
 
-        exchanges = ['COINBASE','BITSTAMP','ITBIT']
-
-        for exchange in exchanges:
-            exchange_code = 'BCHARTS/{}USD'.format(exchange)
-            btc_exchange_df = get_quandl_data(exchange_code)
-            exchange_data[exchange] = btc_exchange_df  
-
-        return exchange_data
+        todays_data = {
+                "open": data.loc[index]["open"],
+                "high": data.loc[index]["high"],
+                "low": data.loc[index]["low"],
+                "close": data.loc[index]["close"],
+                "volume": data.loc[index]["volume"],
+                "num_trades": data.loc[index]["num_trades"]
+        }
+        return todays_data
         
 
-
-def get_quandl_data(quandl_id):
-    """Download and cache Quandl dataseries"""
-    cache_path = '{}.pkl'.format(quandl_id).replace('/','-')
-    try:
-        f = open(cache_path, 'rb')
-        df = pickle.load(f)   
-        print('Loaded {} from cache'.format(quandl_id))
-    except (OSError, IOError) as e:
-        print('Downloading {} from Quandl'.format(quandl_id))
-        df = quandl.get(quandl_id, returns="pandas")
-        df.to_pickle(cache_path)
-        print('Cached {} at {}'.format(quandl_id, cache_path))
-    return df
-
-
 if __name__ == "__main__":
-    pass
+    eth = Cryptocurrency("Ethereum", "eth")
+    print(eth.current_market_data())

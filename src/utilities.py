@@ -8,7 +8,12 @@ including ones for cleaning data
 import os
 import re
 import sys
+import requests        
+import json            
+import datetime as dt  
 
+import pandas as pd    
+import numpy as np     
 from textblob import TextBlob
 
 
@@ -51,6 +56,26 @@ def text_sentiment(content: str) -> float:
     content = clean_text_for_tfidf(content)
     analysis = TextBlob(content)
     return analysis.sentiment.polarity
+                       
+
+def get_bars(symbol: str, interval = '1d'):
+    """
+    Uses binance api to pull historical data on a coin pairing 
+    
+    :param symbol: str of the form COIN_1COIN_2 ex: ETHBTC
+    :interval: str frequency of candles, ex: 1h, 1d, 1w, 1m, 
+    :returns: pandas dataframe with all the historical data
+    """
+    root_url = 'https://api.binance.com/api/v1/klines'
+    url = root_url + '?symbol=' + symbol + '&interval=' + interval
+    data = json.loads(requests.get(url).text)
+    df = pd.DataFrame(data)
+    df.columns = ['open_time',
+                    'open', 'high', 'low', 'close', 'volume',
+                    'close_time', 'quote_asset_vol', 'num_trades',
+                    'taker_base_vol', 'taker_quote_vol', 'ignore']
+    df.index = [str(dt.datetime.fromtimestamp(x/1000.0)) for x in df.close_time]
+    return df
 
 
 def clean_text_function(content: str) -> str:
