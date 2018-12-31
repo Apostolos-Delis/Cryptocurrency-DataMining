@@ -33,23 +33,28 @@ from json_parser import JSONTweetParser
 from api_manager import APIManager 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utilities import error, make_directory
+from cryptocurrency import Cryptocurrency
 
 
 class TweetManager:
     """
     class for handling all interactions with the twitter api. 
     Usage: 
-        >>> coins = ["bitcoin", "ethereum"]
+        >>> coins = [Cryptocurrency("bitcoin", "btc", "date"), \ 
+        ...     Cryptocurrency("ethereum", "eth", "date")]
         >>> tweet_manager = TweetManager(coins, num_threads=2)
         >>> tweet_manager.get_tweets(num_tweets_per_coin=2)
         ... [{<tweet_1_info>}, {...}] 
     """
     SECONDS_PER_ITERATION = 5
 
-
     def __init__(self, cryptocurrencies, num_threads=12):
         if not isinstance(cryptocurrencies, list):
             raise TypeError("Cryptocurrencies must be of type 'list'")
+
+        for coin in cryptocurrencies:
+            if not isinstance(coin, Cryptocurrency):
+                raise TypeError("All cryptocurrencies must be of type 'Cryptocurrency'")
 
         self.cryptocurrencies = cryptocurrencies
         self.num_threads = min(num_threads, len(cryptocurrencies))
@@ -88,8 +93,9 @@ class TweetManager:
         :param verbose: bool for whether to display more in-progress information
         """
         start = time.time()
-        print("Beginning to pull data...")
-        print("Coins:", self.cryptocurrencies)
+        print("Beginning to pull data for...")
+        for coin in self.cryptocurrencies:
+            print(coin)
 
         self._tweets = list()
         while num_tweets_per_coin > 0:
@@ -155,7 +161,7 @@ class TweetManager:
             exit(-1)
 
         
-    def _threader(self, num_tweets, verbose):
+    def _threader(self, num_tweets: int, verbose: bool):
         """ 
         Main multithreading function for each thread that looks for available
         hashtags to mine.
@@ -169,7 +175,7 @@ class TweetManager:
             self._queue.task_done()
 
 
-    def _mine_tweet_data(self, hashtag: str, verbose=False, num_tweets=200):
+    def _mine_tweet_data(self, hashtag: Cryptocurrency, verbose=False, num_tweets=200):
         """
         Mines one hashtag from twitter using the twitter api at a specified time 
         and creates a file with the cleaned out tweets
@@ -180,36 +186,61 @@ class TweetManager:
         """
         # Search for latest tweets about the hashtag currenty selected
         with self._lock:
-            try:
-                raw_tweets = self._twitter.search.tweets(q=hashtag,
-                    result_type='recent', lang='en', count=num_tweets)
-            except TwitterHTTPError as err:
-                print("Switching api key, number of keys left:",
-                        self._api_manager.remaining_api_keys())
-                self._load_twitter_api()
-                raw_tweets = self._twitter.search.tweets(q=hashtag,
-                    result_type='recent', lang='en', count=num_tweets)
-            except:
-                print(e)
-                exit(-1)
+            raw_tweets = self._search_twitter(query=hashtag.name, num_tweets=num_tweets)
 
-        # Construct formatted tweet data and append it to the list of clean_tweets
         length = len(raw_tweets['statuses'])
         num_tweets -= length
+        with self._lock:
+            print(hashtag.name, ":", num_tweets)
+        # Construct formatted tweet data and append it to the list of clean_tweets
         clean_tweets = list()
         for index, tweet in enumerate(raw_tweets['statuses']):
-            jsonParser = JSONTweetParser(raw_tweets['statuses'][index], coin=hashtag)
+            jsonParser = JSONTweetParser(raw_tweets['statuses'][index], coin=hashtag.name)
+            clean_tweets.append(jsonParser.construct_tweet_json())
+
+        # Search for the remainder of tweets using the coin's ticker symbol
+        with self._lock:
+            raw_tweets = self._search_twitter(query=hashtag.ticker, num_tweets=num_tweets)
+
+        length += len(raw_tweets["statuses"])
+        for index, tweet in enumerate(raw_tweets['statuses']):
+            jsonParser = JSONTweetParser(raw_tweets['statuses'][index], coin=hashtag.ticker)
             clean_tweets.append(jsonParser.construct_tweet_json())
 
         with self._lock:
             self._tweets = self._tweets + clean_tweets
             if verbose:
-                print("Mine Tweet Data call, got", length, "tweets for", hashtag)
+                print("Mine Tweet Data call, got", length, "tweets for", hashtag.name)
+
+
+    def _search_twitter(self, query: str, num_tweets: int):
+        """
+        Searches Twitter for a term and returns the raw data pulled from the api
+        :param query: the str to be searched
+        :param num_tweets: int of max number of tweets to search
+        """
+        if num_tweets == 0:
+            return dict()
+        try:
+            raw_tweets = self._twitter.search.tweets(q=query,
+                result_type='recent', lang='en', count=num_tweets)
+        except TwitterHTTPError as err:
+            print("Switching api key, number of keys left:",
+                    self._api_manager.remaining_api_keys())
+            self._load_twitter_api()
+            raw_tweets = self._twitter.search.tweets(q=query,
+                result_type='recent', lang='en', count=num_tweets)
+        except Exception as e:
+            print(e)
+            exit(-1)
+        return raw_tweets
 
 
 if __name__ == "__main__":
-    coins = ["ethereum", "meme"]
-    tweets = TweetManager(HASHTAGS, num_threads=10)
+    eth = Cryptocurrency("Ethereum", "eth", "date", [])
+    btc = Cryptocurrency("Bitcoin", "btc", "Date", [])
+    coins = [eth, btc]
+    tweets = TweetManager(coins, num_threads=10)
     tweet_list =  tweets.get_tweets(100, verbose=True)
     print("length:", len(tweet_list))
     # print(tweet_list)

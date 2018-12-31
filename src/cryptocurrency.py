@@ -27,10 +27,15 @@ class Cryptocurrency:
 
 
     def get_market_data(self):
+        """
+        TODO: Implement Get market Data
+        """
         exchange_data = {}
 
         btc_usd_price_kraken = get_quandl_data('BCHARTS/KRAKENUSD')
         exchange_data['KRAKEN'] = btc_usd_price_kraken
+
+        exchanges = ['COINBASE','BITSTAMP','ITBIT']
 
         for exchange in exchanges:
             exchange_code = 'BCHARTS/{}USD'.format(exchange)
@@ -57,7 +62,4 @@ def get_quandl_data(quandl_id):
 
 
 if __name__ == "__main__":
-    btc = Cryptocurrency("bitcoin", "btc", "2008-10-31", ["COINBASE"])
-    print(btc)
-    print(btc.get_market_data())
-
+    pass
