@@ -90,7 +90,7 @@ class DatabaseWrapper:
         keys = tuple(entry.keys())
         values = tuple(entry.values())
         keys = "(" + ", ".join([str(key) for key in keys]) + ")"
-        sql_statement = "INSERT INTO {0} {1} VALUES {2}".format(table,
+        sql_statement = "INSERT IGNORE INTO {0} {1} VALUES {2}".format(table,
                 keys, str(values))
         self._cursor.execute(sql_statement)
         self._database.commit()
