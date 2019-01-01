@@ -49,17 +49,6 @@ def create_tables(database: DatabaseWrapper):
     for coin in CRYPTOS:
         database.create_table(coin.name, specific_crypto_schema)
 
-    tweets_schema = {
-            "id": "BIGINT UNSIGNED UNIQUE PRIMARY KEY NOT NULL",
-            "date": "DATE",
-            "content": "VARCHAR(1120) CHARACTER SET utf8 COLLATE utf8_unicode_ci",
-            "coin_id": "INT UNSIGNED FOREIGN KEY NOT NULL",
-            "sentiment": "FLOAT",
-            "user_id": "BIGINT UNSIGNED FOREIGN KEY NOT NULL",
-            "retweets": "INT UNSIGNED",
-    }
-    database.create_table("tweets", tweets_schema)
-
     twitter_users_schema = {
             "id": "BIGINT UNSIGNED UNIQUE PRIMARY KEY NOT NULL",
             "date_created": "DATE",
@@ -68,22 +57,37 @@ def create_tables(database: DatabaseWrapper):
     }
     database.create_table("twitter_users", twitter_users_schema)
 
+    tweets_schema = {
+            "id": "BIGINT UNSIGNED UNIQUE PRIMARY KEY NOT NULL",
+            "date": "DATE",
+            "content": "VARCHAR(1120) CHARACTER SET utf8 COLLATE utf8_unicode_ci",
+            "coin_id": "INT UNSIGNED NOT NULL",
+            "sentiment": "FLOAT",
+            "user_id": "BIGINT UNSIGNED NOT NULL",
+            "retweets": "INT UNSIGNED",
+    }
+    tweets_foreign_keys = {
+            "coin_id": ("cryptocurrencies", "id"),
+            "user_id": ("twitter_users", "id"),
+    }
+    database.create_table("tweets", tweets_schema, tweets_foreign_keys)
+
     hashtag_schema = {
             "id": "INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL",
             "name": "VARCHAR(50) NOT NULL",
     }
     database.create_table("hashtags", hashtag_schema)
 
-    sql_for_tweet_hashtag = """
-CREATE TABLE tweet_hashtag (
-    tweet_id BIGINT UNSIGNED NOT NULL,
-    hashtag_id INTEGER UNSIGNED NOT NULL,
-    FOREIGN KEY (tweet_id) REFERENCES tweets (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (hashtag_id) REFERENCES hashtags (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    PRIMARY KEY (tweet_id, hashtag_id)
-);
-"""
-    database.execute(sql_for_tweet_hashtag)
+    # sql_for_tweet_hashtag = """
+# CREATE TABLE tweet_hashtag (
+    # tweet_id BIGINT UNSIGNED NOT NULL,
+    # hashtag_id INTEGER UNSIGNED NOT NULL,
+    # FOREIGN KEY (tweet_id) REFERENCES tweets (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    # FOREIGN KEY (hashtag_id) REFERENCES hashtags (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    # PRIMARY KEY (tweet_id, hashtag_id)
+# );
+# """
+    # database.execute(sql_for_tweet_hashtag)
 
 
 if __name__ == "__main__":

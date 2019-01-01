@@ -32,7 +32,7 @@ class DatabaseWrapper:
         self._cursor.execute(sql_statement)
 
 
-    def create_table(self, table_name: str, schema: dict):
+    def create_table(self, table_name: str, schema: dict, foreign_keys: dict = None):
         """
         Creates a table in the database
 
@@ -40,6 +40,10 @@ class DatabaseWrapper:
         :param schema: dict containing the structure of the table, an example
                        of a table containing student ids and their names would be:
                        {"name": "VARCHAR(255)", "id": "INTEGER PRIMARY KEY"}
+        :param foreign_keys: dict that specifies which columns are foreign keys and 
+                             what columns they reference, dict should have the following 
+                             structure:
+                             {"column": ("table", "col_reference"), "column_2": ... }
         """
         if not isinstance(schema, dict):
             raise TypeError("The table schema must be a dictionary")
@@ -51,6 +55,12 @@ class DatabaseWrapper:
         sql_statement = "CREATE TABLE {0} (".format(table_name)
         for k,v in schema.items():
             sql_statement += "{0} {1}, ".format(k, v)
+
+        if isinstance(foreign_keys, dict):
+            for key in foreign_keys.keys():
+                sql_statement += "FOREIGN KEY ({0}) REFERENCES {1} ({2})".format(
+                        key, foreign_keys[key][0], foreign_keys[key][1])
+                sql_statement += " ON DELETE RESTRICT ON UPDATE CASCADE, "
         
         # Remove the last comma and space from the sql command and add a closing )
         sql_statement = sql_statement[:-2] 
