@@ -41,6 +41,7 @@ class TweetManager:
     """
     class for handling all interactions with the twitter api. 
     Usage: 
+        >>> from data_collection import Cryptocurrency, TweetManager
         >>> coins = [Cryptocurrency("bitcoin", "btc", "date"), \ 
         ...     Cryptocurrency("ethereum", "eth", "date")]
         >>> tweet_manager = TweetManager(coins, num_threads=2)
@@ -50,8 +51,9 @@ class TweetManager:
     SECONDS_PER_ITERATION = 5
 
     def __init__(self, cryptocurrencies, num_threads=12):
-        if not isinstance(cryptocurrencies, list):
-            raise TypeError("Cryptocurrencies must be of type 'list'")
+        if not isinstance(cryptocurrencies, list) and \
+                not isinstance(cryptocurrencies, tuple):
+            raise TypeError("Cryptocurrencies must be of type 'list' or 'tuple'")
 
         for coin in cryptocurrencies:
             if not isinstance(coin, Cryptocurrency):

@@ -45,7 +45,7 @@ class DatabaseWrapper:
             raise TypeError("The table schema must be a dictionary")
         
         if table_name in self.show_tables():
-            print(table_name, "already exists, ignoring...")
+            print(table_name, " table already exists, ignoring...")
             return
         
         sql_statement = "CREATE TABLE {0} (".format(table_name)
@@ -55,8 +55,7 @@ class DatabaseWrapper:
         # Remove the last comma and space from the sql command and add a closing )
         sql_statement = sql_statement[:-2] 
         sql_statement += ")"
-
-        print(sql_statement)
+        
         self._cursor.execute(sql_statement)
 
 
@@ -83,7 +82,6 @@ class DatabaseWrapper:
         keys = "(" + ", ".join([str(key) for key in keys]) + ")"
         sql_statement = "INSERT INTO {0} {1} VALUES {2}".format(table,
                 keys, str(values))
-        print(sql_statement)
         self._cursor.execute(sql_statement)
         self._database.commit()
 
@@ -96,18 +94,12 @@ class DatabaseWrapper:
         self._cursor.execute(query)
         return [q for q in self._cursor]
 
+    
+    def execute(self, sql_statement):
+        """Will execute the given sql statement"""
+        self._cursor.execute(sql_statement)
+        self._database.commit()
+
 
 if __name__ == "__main__":
-    dbw = DatabaseWrapper()
-    print(dbw.show_tables())
-    crypto_currency_schema = {
-            "id": "INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL",
-            "name": "VARCHAR(20) NOT NULL",
-            "ticker": "VARCHAR(10) NOT NULL",
-    }
-    dbw.create_table("cryptocurrencies", crypto_currency_schema)
-    from data_collection import Cryptocurrency
-    eth = Cryptocurrency("etheruem", "eth")
-    # table = "CREATE TABLE example ( id smallint unsigned not null auto_increment, name varchar(20) not null, constraint pk_example primary key (id) );"
-    # dbw.insert_into_table(table="cryptocurrencies", entry=eth.schema())
-    print(dbw.query("SELECT * FROM cryptocurrencies"))
+    pass

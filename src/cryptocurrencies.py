@@ -5,7 +5,7 @@ All Cryptocurrency Constants
 """
 from data_collection import Cryptocurrency
 
-BITCOIN = Cryptocurrency("Bitcoin", "BTC")
+
 ETHEREUM = Cryptocurrency("Ethereum", "ETH")
 RIPPLE = Cryptocurrency("Ripple", "XRP")
 EOS = Cryptocurrency("Eos", "EOS")
@@ -16,4 +16,8 @@ ONTOLOGY = Cryptocurrency("Ontology", "ONT")
 DECRED = Cryptocurrency("Decred", "DCR")
 NANO = Cryptocurrency("Nano", "NANO")
 ICON = Cryptocurrency("Icon", "ICX")
+
+CRYPTOS = (ETHEREUM, RIPPLE, EOS, CARDANO, NEO,
+        VECHAIN, ONTOLOGY, DECRED, NANO, ICON)
+
 
