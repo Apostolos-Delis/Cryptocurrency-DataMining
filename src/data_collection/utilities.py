@@ -58,7 +58,7 @@ def text_sentiment(content: str) -> float:
     return analysis.sentiment.polarity
                        
 
-def get_bars(symbol: str, interval = '1d'):
+def get_bars(symbol: str, interval = "1d"):
     """
     Uses binance api to pull historical data on a coin pairing 
     

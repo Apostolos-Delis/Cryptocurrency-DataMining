@@ -52,6 +52,14 @@ class Cryptocurrency:
                 "num_trades": data.loc[index]["num_trades"]
         }
         return todays_data
+
+
+    def schema(self):
+        schema = {
+                "name": self.name,
+                "ticker": self.ticker,
+        }
+        return schema
         
 
 if __name__ == "__main__":

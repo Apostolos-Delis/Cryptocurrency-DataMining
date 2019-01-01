@@ -25,6 +25,12 @@ class DatabaseWrapper:
         )
         self._cursor = self._database.cursor()
     
+    
+    def create_user(username: str, password: str):
+        """Creates a new user for the database with all privileges"""
+        sql_statement = f"GRANT ALL PRIVILEGES ON *.* TO {username}'@'localhost IDENTIFIED BY {password}"
+        self._cursor.execute(sql_statement)
+
 
     def create_table(self, table_name: str, schema: dict):
         """
@@ -50,6 +56,7 @@ class DatabaseWrapper:
         sql_statement = sql_statement[:-2] 
         sql_statement += ")"
 
+        print(sql_statement)
         self._cursor.execute(sql_statement)
 
 
@@ -73,10 +80,12 @@ class DatabaseWrapper:
 
         keys = tuple(entry.keys())
         values = tuple(entry.values())
+        keys = "(" + ", ".join([str(key) for key in keys]) + ")"
         sql_statement = "INSERT INTO {0} {1} VALUES {2}".format(table,
-                str(keys), str(values))
+                keys, str(values))
+        print(sql_statement)
         self._cursor.execute(sql_statement)
-        self._cursor.commit()
+        self._database.commit()
 
     
     def delete_table(self, table: str):
@@ -89,4 +98,16 @@ class DatabaseWrapper:
 
 
 if __name__ == "__main__":
-    pass
+    dbw = DatabaseWrapper()
+    print(dbw.show_tables())
+    crypto_currency_schema = {
+            "id": "INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL",
+            "name": "VARCHAR(20) NOT NULL",
+            "ticker": "VARCHAR(10) NOT NULL",
+    }
+    dbw.create_table("cryptocurrencies", crypto_currency_schema)
+    from data_collection import Cryptocurrency
+    eth = Cryptocurrency("etheruem", "eth")
+    # table = "CREATE TABLE example ( id smallint unsigned not null auto_increment, name varchar(20) not null, constraint pk_example primary key (id) );"
+    # dbw.insert_into_table(table="cryptocurrencies", entry=eth.schema())
+    print(dbw.query("SELECT * FROM cryptocurrencies"))
