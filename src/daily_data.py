@@ -18,9 +18,31 @@ from data_collection import Cryptocurrency, TweetManager
 def main():
 
     database = DatabaseWrapper()
+    # database.delete_table("tweet_hashtag")
+    # database.delete_table("tweets")
+    # for table in database.show_tables():
+        # database.delete_table(table)
+
     create_tables(database)
     tables = database.show_tables()
     print(tables)
+    fill_cryptocurrency_table(database, CRYPTOS)
+
+    # tweet_manager = TweetManager(CRYPTOS, num_threads=10)
+    # tweets = tweet_manager.get_tweets(num_tweets_per_coin=1)
+    # print(tweets)
+
+
+def fill_cryptocurrency_table(database: DatabaseWrapper, coins: list):
+    """
+    Will populate the cryptocurrency table in the database
+    with everything from coins
+    :param database: any DatabaseWrapper object
+    :param coins: list of Cryptocurrency objects to be added
+    """
+    for coin in coins:
+        database.insert_into_table(entry=coin.schema(), 
+                table="cryptocurrencies")
 
 
 def create_tables(database: DatabaseWrapper):
@@ -30,8 +52,8 @@ def create_tables(database: DatabaseWrapper):
     """
     cryptocurrency_table_schema = {
             "id": "INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL",
-            "name": "VARCHAR(20) NOT NULL",
-            "ticker": "VARCHAR(10) NOT NULL",
+            "name": "VARCHAR(20) UNIQUE NOT NULL",
+            "ticker": "VARCHAR(10) UNIQUE NOT NULL",
     }
     database.create_table("cryptocurrencies", cryptocurrency_table_schema)
 
@@ -78,16 +100,17 @@ def create_tables(database: DatabaseWrapper):
     }
     database.create_table("hashtags", hashtag_schema)
 
-    # sql_for_tweet_hashtag = """
-# CREATE TABLE tweet_hashtag (
-    # tweet_id BIGINT UNSIGNED NOT NULL,
-    # hashtag_id INTEGER UNSIGNED NOT NULL,
-    # FOREIGN KEY (tweet_id) REFERENCES tweets (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    # FOREIGN KEY (hashtag_id) REFERENCES hashtags (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    # PRIMARY KEY (tweet_id, hashtag_id)
-# );
-# """
-    # database.execute(sql_for_tweet_hashtag)
+    if "tweet_hashtag" not in database.show_tables():
+
+        sql_for_tweet_hashtag = """
+CREATE TABLE tweet_hashtag (
+    tweet_id BIGINT UNSIGNED NOT NULL,
+    hashtag_id INTEGER UNSIGNED NOT NULL,
+    FOREIGN KEY (tweet_id) REFERENCES tweets (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (hashtag_id) REFERENCES hashtags (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (tweet_id, hashtag_id)
+); """
+        database.execute(sql_for_tweet_hashtag)
 
 
 if __name__ == "__main__":
