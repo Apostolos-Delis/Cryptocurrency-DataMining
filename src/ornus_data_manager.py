@@ -45,8 +45,10 @@ class DataManager:
             "user_id": "BIGINT UNSIGNED NOT NULL",
             "retweets": "INT UNSIGNED",
 
-        Will also add the hashtags to the database
+        Will also add the hashtags to the database, and the twitter user to the database
         """
+        self.insert_twitter_user(tweet["user"])
+
         for hashtag in tweet["hashtags"]:
             self.insert_hashtag(hashtag)
             tweet_hashtag = {
