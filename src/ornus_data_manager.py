@@ -63,9 +63,6 @@ class DataManager:
             try:
                 self._database.insert_into_table(formatted_tweet, "tweets")
             except Exception as e: 
-                f = open("errors", "a+")
-                f.write(str(e))
-                f.close()
                 return
 
         # Insert the hashtags into the hashtag table and insert them into the 
@@ -77,7 +74,8 @@ class DataManager:
                     "tweet_id": tweet["id"],
                     "hashtag_id": self.get_hashtag_id(hashtag),
             }
-            self._database.insert_into_table(tweet_hashtag, "tweet_hashtag")
+            if None not in tweet_hashtag.values():
+                self._database.insert_into_table(tweet_hashtag, "tweet_hashtag")
             
 
     def get_hashtag_id(self, hashtag: str):
@@ -86,8 +84,11 @@ class DataManager:
         returns None if coin is not in the table
         :param hashtag: str of the hashtag
         """
-        sql = "SELECT id FROM hashtags WHERE name = '{0}'".format(hashtag)
-        result = self._database.query(sql)
+        try:
+            sql = "SELECT id FROM hashtags WHERE name = '{0}'".format(hashtag)
+            result = self._database.query(sql)
+        except:
+            return None
         if result == []:
             return None
         return result[0][0]
