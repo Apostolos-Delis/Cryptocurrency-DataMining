@@ -30,6 +30,7 @@ class DatabaseWrapper:
         """Creates a new user for the database with all privileges"""
         sql_statement = f"GRANT ALL PRIVILEGES ON *.* TO {username}'@'localhost IDENTIFIED BY {password}"
         self._cursor.execute(sql_statement)
+        self._database.commit()
 
 
     def create_table(self, table_name: str, schema: dict, foreign_keys: dict = None):
@@ -91,7 +92,11 @@ class DatabaseWrapper:
         values = tuple(entry.values())
         keys = "(" + ", ".join([str(key) for key in keys]) + ")"
         sql_statement = "INSERT IGNORE INTO {0} {1} VALUES {2}".format(table,
-                keys, str(values))
+            keys, str(values))
+        if len(values) == 1:
+            # Remove the last comma and space from the sql command and add a closing )
+            sql_statement = sql_statement[:-2] 
+            sql_statement += ")"
         self._cursor.execute(sql_statement)
         self._database.commit()
 
@@ -105,11 +110,12 @@ class DatabaseWrapper:
         return [q for q in self._cursor]
 
     
-    def execute(self, sql_statement):
+    def execute(self, sql_statement, multi=True):
         """Will execute the given sql statement"""
-        self._cursor.execute(sql_statement)
+        self._cursor.execute(sql_statement, multi=multi)
         self._database.commit()
 
 
 if __name__ == "__main__":
-    pass
+    print("The variable 'd' is an available DatabaseWrapper object")
+    d = DatabaseWrapper()

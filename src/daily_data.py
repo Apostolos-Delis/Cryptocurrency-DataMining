@@ -23,14 +23,37 @@ def main():
     # for table in database.show_tables():
         # database.delete_table(table)
 
-    create_tables(database)
+    create_tables(database, coins=CRYPTOS)
     tables = database.show_tables()
     print(tables)
     fill_cryptocurrency_table(database, CRYPTOS)
 
-    # tweet_manager = TweetManager(CRYPTOS, num_threads=10)
-    # tweets = tweet_manager.get_tweets(num_tweets_per_coin=1)
-    # print(tweets)
+    tweet_manager = TweetManager(CRYPTOS, num_threads=10)
+    tweets = tweet_manager.get_tweets(num_tweets_per_coin=1)
+    """
+    {'id': 1080154244265795585, 'text': 'RT @BravoToken: 👉We are Giving 1,000,000 BVO to 500 People\n\nName : BRAVO TOKEN\nSymbol : BVO\nTotal Supply : 5,000,000,000 BVO\n\nTo get 1,000,…', 'hashtags': [], 'date': '2019-Jan-01', 'retweets': 162, 'user': {'date_created': '2018-May-30', 'id': 1001970347564990464, 'followers': 60, 'friends': 138}, 'coin': 'Ethereum', 'sentiment': 0.0}
+
+
+
+    """
+    coin_sentiment = dict()
+    tweet = tweets[0]
+    tweet["date"] = "STR_TO_DATE('{0}', '%Y-%m-%d')".format(tweet["date"])
+    tweet["user"] = 1
+    print(tweet)
+    database.insert_into_table(tweet, table="tweets")
+    # for tweet in tweets:
+        # if tweet["coin"] not in coin_sentiment.keys():
+            # coin_sentiment[tweet["coin"]] = []
+        # coin_sentiment[tweet["coin"]].append(tweet["sentiment"])
+
+
+
+    print(coin_sentiment)
+
+
+        
+        
 
 
 def fill_cryptocurrency_table(database: DatabaseWrapper, coins: list):
@@ -45,10 +68,12 @@ def fill_cryptocurrency_table(database: DatabaseWrapper, coins: list):
                 table="cryptocurrencies")
 
 
-def create_tables(database: DatabaseWrapper):
+def create_tables(database: DatabaseWrapper, coins):
     """
     Creates all the tables Necessary for the data, if the data already exists
     it does nothing
+    :database: any DatabaseWrapper object
+    :coins: list of Cryptocurrency objects
     """
     cryptocurrency_table_schema = {
             "id": "INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL",

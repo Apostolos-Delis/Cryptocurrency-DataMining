@@ -116,7 +116,7 @@ class JSONTweetParser:
             }
 
         _, month, day, _, _, year = date.split()
-        return separator.join([year, month, day])
+        return separator.join([year, month_to_digit[month], day])
 
 
 if __name__ == "__main__":
