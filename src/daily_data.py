@@ -18,25 +18,36 @@ NUM_TWEETS = 500
 
 
 def main():
+    print("Initiallizing...")
     database = DataManager(CRYPTOS)
     # First Make sure all the tables for the database are built
+    print("Creating Tables")
     database.create_tables()
+    print()
     # Populate the cryptocurrency database
+    print("Populating cryptocurrency table...")
     database.fill_cryptocurrency_table()
     # Get all the tweets needed for one day
+    print("Generating TweetManager...")
     tweet_manager = TweetManager(CRYPTOS, num_threads=10)
     tweets = tweet_manager.get_tweets(num_tweets_per_coin=NUM_TWEETS, verbose=False)
+    print(len(tweets), "tweets identified for", len(CRYPTOS), "cryptocurrencies")
 
     # Go through the coins and insert each tweet to the database
     # And collect all the sentiment data to insert into the market data tables
+    print("Collecting Coin Sentiment")
     coin_sentiment = dict()
-    for tweet in tweets:
+    for index, tweet in enumerate(tweets):
         if tweet["coin"] not in coin_sentiment.keys():
             coin_sentiment[tweet["coin"]] = []
         coin_sentiment[tweet["coin"]].append(tweet["sentiment"])
         database.insert_tweet(tweet)
+        if index % 500 == 0:
+            print("Processed sentiment for", index, "of", len(tweets), "tweets.", end=" ")
+            print("Percent Complete:", index/len(tweets))
 
     # Insert the market data for all the coins in CRYPTOS
+    print("Beginning to Process Market Data")
     database.fill_market_data_tables(coin_sentiment)
 
 

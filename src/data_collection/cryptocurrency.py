@@ -8,7 +8,11 @@ import pandas as pd
 
 from .utilities import get_bars
 
+
 class Cryptocurrency:
+    """
+    Class To represent cryptocurrencies
+    """
 
     def __init__(self, name: str, ticker: str, 
             date_founded: str = "2008-10-31"):
@@ -64,5 +68,4 @@ class Cryptocurrency:
         
 
 if __name__ == "__main__":
-    eth = Cryptocurrency("Ethereum", "eth")
-    print(eth.current_market_data())
+    pass

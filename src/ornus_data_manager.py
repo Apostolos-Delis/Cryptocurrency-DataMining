@@ -53,7 +53,7 @@ class DataManager:
             self.insert_hashtag(hashtag)
             tweet_hashtag = {
                     "tweet_id": tweet["id"],
-                    "hashtag_id": self.get_hashtag_id(hashtag)
+                    "hashtag_id": self.get_hashtag_id(hashtag),
             }
             self._database.insert_into_table(tweet_hashtag, "tweet_hashtag")
             
@@ -66,7 +66,8 @@ class DataManager:
                 "user_id": tweet["user"]["id"],
                 "retweets": tweet["retweets"]
         }
-        self._database.insert_into_table(formatted_tweet, "tweets")
+        if formatted_tweet["coin_id"] is not None:
+            self._database.insert_into_table(formatted_tweet, "tweets")
 
 
     def get_hashtag_id(self, hashtag: str):
@@ -147,7 +148,7 @@ class DataManager:
         """
         cryptocurrency_table_schema = {
                 "id": "INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL",
-                "name": "VARCHAR(20) UNIQUE NOT NULL",
+                "name": "VARCHAR(30) UNIQUE NOT NULL",
                 "ticker": "VARCHAR(10) UNIQUE NOT NULL",
         }
         self._database.create_table("cryptocurrencies", cryptocurrency_table_schema)

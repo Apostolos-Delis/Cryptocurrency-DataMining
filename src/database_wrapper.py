@@ -66,7 +66,6 @@ class DatabaseWrapper:
         # Remove the last comma and space from the sql command and add a closing )
         sql_statement = sql_statement[:-2] 
         sql_statement += ")"
-        
         self._cursor.execute(sql_statement)
 
 
@@ -97,6 +96,7 @@ class DatabaseWrapper:
             # Remove the last comma and space from the sql command and add a closing )
             sql_statement = sql_statement[:-2] 
             sql_statement += ")"
+
         self._cursor.execute(sql_statement)
         self._database.commit()
 
