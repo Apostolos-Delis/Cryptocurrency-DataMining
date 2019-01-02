@@ -9,7 +9,22 @@ from database_wrapper import DatabaseWrapper
 
 class DataManager:
     """
-    TODO: Write Documentation
+    Class for manipulation of data specific to this project's database.
+    It essentially wraps around the DatabaseWrapper() class.
+    This creates and communicates to the ornus database which has the following 
+    structure:
+
+    Tables:
+        tweets: table with all the tweets from each coin
+        twitter_users: table with all the twitter users that were found from
+                       collecting tweets
+        hashtags: table with all the hashtags found in tweets
+        tweet_hashtag: many to many relationship between tweets and hashtags
+        cryptocurrencies: a table of all the cryptocurrencies
+    
+        Then each cryptocurrency additionally also has its own table storing 
+        its daily market data. So there is an additional 30 - 100 tables for 
+        all the cryptocurrencies currently being collected
     """
 
     def __init__(self, coins):
@@ -218,7 +233,6 @@ CREATE TABLE tweet_hashtag (
     PRIMARY KEY (tweet_id, hashtag_id)
 ); """
             self._database.execute(sql_for_tweet_hashtag)
-        print(self._database.show_tables())
 
 
 if __name__ == "__main__":
