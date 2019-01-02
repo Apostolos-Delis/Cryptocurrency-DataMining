@@ -29,6 +29,7 @@ except ImportError:
 
 from twitter import Twitter, OAuth, TwitterHTTPError
 
+
 from .json_parser import JSONTweetParser
 from .api_manager import APIManager 
 from .utilities import error
@@ -118,8 +119,10 @@ class TweetManager:
                 t.start()
                 
             # Add the hashtags to be searched into the queue
-            for coin in self.cryptocurrencies:
-                self._queue.put(coin)
+            list(map(self._queue.put, self.cryptocurrencies))
+
+            # for coin in self.cryptocurrencies:
+                # self._queue.put(coin)
         
             self._queue.join()
             
@@ -128,15 +131,17 @@ class TweetManager:
                 self._queue.put(None)
             
             # Stop threads
-            for t in self._threads:
-                t.join()
+            list(map(lambda t: t.join(), self._threads))
+            # for t in self._threads:
+                # t.join()
+
         
             num_tweets_per_coin -= num_tweets_to_pull
             print("Num Tweets remaining: {0}".format(num_tweets_per_coin))
             print("Time Elapsed: {:.3f} seconds\n".format(time.time() - iteration_start))
             
-            #Wait at least until the designated number of seconds allocated
-            #for each iteration has passed
+            # Wait at least until the designated number of seconds allocated
+            # for each iteration has passed
             while True and num_tweets_per_coin != 0:
                 if (time.time() - iteration_start) >= TweetManager.SECONDS_PER_ITERATION:
                     break
@@ -151,7 +156,6 @@ class TweetManager:
         api key available
         """
         with self._lock:
-
             if self._twitter is not None:
                 try:
                     raw_tweets = self._twitter.search.tweets(q="test_twitter_api",
@@ -249,10 +253,4 @@ class TweetManager:
 
 
 if __name__ == "__main__":
-    eth = Cryptocurrency("Ethereum", "eth")
-    btc = Cryptocurrency("Bitcoin", "btc")
-    coins = [eth, btc]
-    tweets = TweetManager(coins, num_threads=2)
-    tweet_list =  tweets.get_tweets(100, verbose=True)
-    print("length:", len(tweet_list))
-    # print(tweet_list)
+    pass

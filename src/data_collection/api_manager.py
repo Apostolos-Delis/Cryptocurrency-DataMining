@@ -65,8 +65,7 @@ class APIManager:
         except json.decoder.JSONDecodeError:
             error("Error: Json file is not properly formatted!")
             exit(-1)
-        for oath_tokens in key_json["keys"]:
-            self._api_keys.put(oath_tokens)
+        list(map(self._api_keys.put, key_json["keys"]))
 
 
     def next_api_key(self):

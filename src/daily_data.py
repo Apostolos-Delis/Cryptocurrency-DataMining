@@ -43,8 +43,8 @@ def main():
             coin_sentiment[tweet["coin"]] = []
         coin_sentiment[tweet["coin"]].append(tweet["sentiment"])
         database.insert_tweet(tweet)
-        if index % 500 == 0:
-            print("Processed sentiment for", index, "of", len(tweets), "tweets.", end=" ")
+        if (index + 1) % 500 == 0:
+            print("Processed sentiment for", (index+1), "of", len(tweets), "tweets.", end=" ")
             print("Percent Complete: {:0.2f}".format(index/len(tweets)))
 
     # Insert the market data for all the coins in CRYPTOS
