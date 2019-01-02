@@ -10,7 +10,10 @@ import os
 # To allow importing from the parent directory
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from .utilities import error
+if __name__ != "__main__":
+    from .utilities import error
+else:
+    from utilities import error
 
 class APIManager:
     """
@@ -78,5 +81,29 @@ class APIManager:
 
 
 if __name__ == "__main__":
-    pass
+    from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
+    print("Beginning Tests on the api keys")
+    keys = APIManager()
+    count = 1
+    hashtag = "bitcoin"
+    while keys.remaining_api_keys() > 0:
+        print("Testing API key number:", count)
+        key = keys.next_api_key()
+        oauth = OAuth(key["ACCESS_TOKEN"],
+                key["ACCESS_SECRET"], 
+                key["CONSUMER_KEY"], 
+                key["CONSUMER_SECRET"])
 
+        twitter = Twitter(auth=oauth)
+        try:
+            raw_tweets = twitter.search.tweets(q=hashtag,
+                result_type='recent', lang='en', count=1)
+            print("Key: {0} Passed".format(count))
+        except Exception as e:
+            print(e)
+            print("Key number {0} failed!".format(count))
+            print("key:", key)
+        count += 1
+            
+        
+        
