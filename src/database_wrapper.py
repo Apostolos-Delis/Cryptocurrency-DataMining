@@ -110,9 +110,9 @@ class DatabaseWrapper:
         return [q for q in self._cursor]
 
     
-    def execute(self, sql_statement, multi=True):
+    def execute(self, sql_statement):
         """Will execute the given sql statement"""
-        self._cursor.execute(sql_statement, multi=multi)
+        self._cursor.execute(sql_statement, multi=False)
         self._database.commit()
 
 

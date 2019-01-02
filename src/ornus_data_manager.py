@@ -105,6 +105,41 @@ class DataManager:
                     table="cryptocurrencies")
 
 
+    def fill_market_data_tables(self, sentiment_data: dict):
+        """
+        Populate each table for each individual cryptocurrency with its daily market data
+        :param sentiment_data: dict storing all the twitter sentiment values for each coin
+                               so its structure should be: 
+                               {"coin1": [ ... ], "coin2": [ ... ], ... }
+        """
+        for coin in self.coins: 
+            total_length = len(sentiment_data[coin.name])
+            positive = 0
+            negative = 0
+            for sentiment in sentiment_data[coin.name]:
+                if sentiment > 0:
+                    positive += 1
+                elif sentiment < 0: 
+                    negative += 1
+            average_sentiment = sum(sentiment_data[coin.name]) / total_length
+            pos_percentage = positive / total_length
+            neg_percentage = negative / total_length
+
+            coin_data = coin.current_market_data()
+            market_data = {
+                "date": coin_data["date"],
+                "open": coin_data["open"],
+                "high": coin_data["high"],
+                "low": coin_data["low"],
+                "volume": coin_data["volume"],
+                "num_trades": coin_data["num_trades"],
+                "positive_tweet_sentiment": pos_percentage,
+                "negative_tweet_sentiment": neg_percentage,
+                "average_tweet_sentiment": average_sentiment,
+            }
+            self._database.insert_into_table(market_data, coin.name.lower())
+
+
     def create_tables(self):
         """
         Creates all the tables Necessary for the data, if the data already exists
@@ -123,7 +158,7 @@ class DataManager:
                 "high": "FLOAT",
                 "low": "FLOAT",
                 "volume": "FLOAT",
-                "num_transactions": "INT UNSIGNED",
+                "num_trades": "INT UNSIGNED",
                 "positive_tweet_sentiment": "FLOAT",
                 "negative_tweet_sentiment": "FLOAT",
                 "average_tweet_sentiment": "FLOAT",
@@ -160,24 +195,24 @@ class DataManager:
         }
         self._database.create_table("hashtags", hashtag_schema)
 
-        if "tweet_hashtag" not in database.show_tables():
+        if "tweet_hashtag" not in self._database.show_tables():
 
             sql_for_tweet_hashtag = """
-    CREATE TABLE tweet_hashtag (
-        tweet_id BIGINT UNSIGNED NOT NULL,
-        hashtag_id INTEGER UNSIGNED NOT NULL,
-        FOREIGN KEY (tweet_id) REFERENCES tweets (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (hashtag_id) REFERENCES hashtags (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        PRIMARY KEY (tweet_id, hashtag_id)
-    ); """
-            database.execute(sql_for_tweet_hashtag)
+CREATE TABLE tweet_hashtag (
+    tweet_id BIGINT UNSIGNED NOT NULL,
+    hashtag_id INTEGER UNSIGNED NOT NULL,
+    FOREIGN KEY (tweet_id) REFERENCES tweets (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (hashtag_id) REFERENCES hashtags (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (tweet_id, hashtag_id)
+); """
+            self._database.execute(sql_for_tweet_hashtag)
+        print(self._database.show_tables())
 
 
 if __name__ == "__main__":
-    tweet = {'id': 1080154244265795585, 'text': 'RT @BravoToken: 👉We are Giving 1,000,000 BVO to 500 People\n\nName : BRAVO TOKEN\nSymbol : BVO\nTotal Supply : 5,000,000,000 BVO\n\nTo get 1,000,…', 'hashtags': [], 'date': '2019-01-01', 'retweets': 162, 'user': {'date_created': '2018-03-30', 'id': 1001970347564990464, 'followers': 60, 'friends': 138}, 'coin': 'Ethereum', 'sentiment': 0.0}
+    pass
+    # tweet = {'id': 1080305732099047424, 'text': 'RT @Vixen_Token: 👉We are Giving 1,000,000 Vixen Token to 1,000 People\n\nSEND ZERO ETH  TO : \n\n0xae367F206eeaeA7F6C4845e5F4F97E1f62a7c1F7\n\nGE…', 'hashtags': [], 'date': '2019-1-02', 'retweets': 35, 'user': {'date_created': '2015-5-27', 'id': 3228352105, 'followers': 473, 'friends': 1050}, 'coin': 'ethereum', 'sentiment': 0.0}
+    # database = DataManager([]) 
+    # database.insert_tweet(tweet)
 
-    d = DataManager([])
-    # print(d.get_coin_id("Vechain"))
-    tweet["text"] = "TEST"
-    d.insert_hashtag("YEET")
 

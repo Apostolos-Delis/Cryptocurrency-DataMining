@@ -44,6 +44,7 @@ class Cryptocurrency:
         data = get_bars(pairing, interval="1d")
 
         todays_data = {
+                "date": today,
                 "open": float(data.loc[index]["open"]) * float(pair_data.loc[index]["open"]),
                 "high": float(data.loc[index]["high"]) * float(pair_data.loc[index]["high"]),
                 "low": float(data.loc[index]["low"]) * float(pair_data.loc[index]["low"]),
