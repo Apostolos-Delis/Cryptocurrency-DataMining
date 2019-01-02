@@ -15,6 +15,7 @@ from data_collection import Cryptocurrency, TweetManager
 from ornus_data_manager import DataManager
 
 NUM_TWEETS = 500
+NUM_THREADS = 12
 
 
 def main():
@@ -29,7 +30,7 @@ def main():
     database.fill_cryptocurrency_table()
     # Get all the tweets needed for one day
     print("Generating TweetManager...")
-    tweet_manager = TweetManager(CRYPTOS, num_threads=10)
+    tweet_manager = TweetManager(CRYPTOS, num_threads=NUM_THREADS)
     tweets = tweet_manager.get_tweets(num_tweets_per_coin=NUM_TWEETS, verbose=False)
     print(len(tweets), "tweets identified for", len(CRYPTOS), "cryptocurrencies")
 
@@ -44,7 +45,7 @@ def main():
         database.insert_tweet(tweet)
         if index % 500 == 0:
             print("Processed sentiment for", index, "of", len(tweets), "tweets.", end=" ")
-            print("Percent Complete:", index/len(tweets))
+            print("Percent Complete: {:0.2f}".format(index/len(tweets)))
 
     # Insert the market data for all the coins in CRYPTOS
     print("Beginning to Process Market Data")

@@ -49,14 +49,6 @@ class DataManager:
         """
         self.insert_twitter_user(tweet["user"])
 
-        for hashtag in tweet["hashtags"]:
-            self.insert_hashtag(hashtag)
-            tweet_hashtag = {
-                    "tweet_id": tweet["id"],
-                    "hashtag_id": self.get_hashtag_id(hashtag),
-            }
-            self._database.insert_into_table(tweet_hashtag, "tweet_hashtag")
-            
         formatted_tweet = {
                 "id": tweet["id"],
                 "date": tweet["date"],
@@ -67,8 +59,26 @@ class DataManager:
                 "retweets": tweet["retweets"]
         }
         if formatted_tweet["coin_id"] is not None:
-            self._database.insert_into_table(formatted_tweet, "tweets")
+            # The try except is for ignoring tweets that are not properly encoded and thus ignored
+            try:
+                self._database.insert_into_table(formatted_tweet, "tweets")
+            except Exception as e: 
+                f = open("errors", "a+")
+                f.write(str(e))
+                f.close()
+                return
 
+        # Insert the hashtags into the hashtag table and insert them into the 
+        # tweet_hashtag table for the many to many relationship between tweets
+        # and hashtags
+        for hashtag in tweet["hashtags"]:
+            self.insert_hashtag(hashtag)
+            tweet_hashtag = {
+                    "tweet_id": tweet["id"],
+                    "hashtag_id": self.get_hashtag_id(hashtag),
+            }
+            self._database.insert_into_table(tweet_hashtag, "tweet_hashtag")
+            
 
     def get_hashtag_id(self, hashtag: str):
         """

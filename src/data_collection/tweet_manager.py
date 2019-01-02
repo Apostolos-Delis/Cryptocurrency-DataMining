@@ -150,19 +150,32 @@ class TweetManager:
         Function to create a twitter api object using the next available
         api key available
         """
-        key = self._api_manager.next_api_key()
+        with self._lock:
 
-        oauth = OAuth(key["ACCESS_TOKEN"],
-                key["ACCESS_SECRET"], 
-                key["CONSUMER_KEY"], 
-                key["CONSUMER_SECRET"])
-        
-        # Initiate the connection to Twitter Streaming API
-        try:
-            self._twitter = Twitter(auth=oauth)
-        except Exception as e:
-            error(e)
-            exit(-1)
+            if self._twitter is not None:
+                try:
+                    raw_tweets = self._twitter.search.tweets(q="test_twitter_api",
+                        result_type='recent', lang='en', count=1)
+                    return
+                except TwitterHTTPError as err:
+                    pass
+
+            key = self._api_manager.next_api_key()
+
+            oauth = OAuth(key["ACCESS_TOKEN"],
+                    key["ACCESS_SECRET"], 
+                    key["CONSUMER_KEY"], 
+                    key["CONSUMER_SECRET"])
+            
+            # Initiate the connection to Twitter Streaming API
+            try:
+                self._twitter = Twitter(auth=oauth)
+                print("Switching api key, number of keys left:",
+                        self._api_manager.remaining_api_keys())
+            except Exception as e:
+                error(e)
+                error("Problematic token:", key)
+                exit(-1)
 
         
     def _threader(self, num_tweets: int, verbose: bool):
@@ -189,8 +202,7 @@ class TweetManager:
         :param num_tweets: int of how many tweets to pull from twitter
         """
         # Search for latest tweets about the hashtag currenty selected
-        with self._lock:
-            raw_tweets = self._search_twitter(query=hashtag.name, num_tweets=num_tweets)
+        raw_tweets = self._search_twitter(query=hashtag.name, num_tweets=num_tweets)
 
         length = len(raw_tweets['statuses'])
         num_tweets -= length
@@ -202,8 +214,7 @@ class TweetManager:
             clean_tweets.append(jsonParser.construct_tweet_json())
 
         # Search for the remainder of tweets using the coin's ticker symbol
-        with self._lock:
-            raw_tweets = self._search_twitter(query=hashtag.ticker, num_tweets=num_tweets)
+        raw_tweets = self._search_twitter(query=hashtag.ticker, num_tweets=num_tweets)
 
         length += len(raw_tweets["statuses"])
         for index, tweet in enumerate(raw_tweets['statuses']):
@@ -228,8 +239,6 @@ class TweetManager:
             raw_tweets = self._twitter.search.tweets(q=query,
                 result_type='recent', lang='en', count=num_tweets)
         except TwitterHTTPError as err:
-            print("Switching api key, number of keys left:",
-                    self._api_manager.remaining_api_keys())
             self._load_twitter_api()
             raw_tweets = self._twitter.search.tweets(q=query,
                 result_type='recent', lang='en', count=num_tweets)

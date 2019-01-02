@@ -50,7 +50,7 @@ class DatabaseWrapper:
             raise TypeError("The table schema must be a dictionary")
         
         if table_name in self.show_tables():
-            print(table_name, " table already exists, ignoring...")
+            print(table_name, "table already exists, ignoring...")
             return
         
         sql_statement = "CREATE TABLE {0} (".format(table_name)
