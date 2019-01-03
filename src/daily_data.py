@@ -18,7 +18,7 @@ from data_collection import Cryptocurrency, TweetManager
 from ornus_data_manager import DataManager
 
 NUM_TWEETS = 500
-NUM_THREADS = 12
+NUM_THREADS = 17
 
 
 def main():
@@ -42,16 +42,28 @@ def main():
     print("Collecting Coin Sentiment")
     coin_sentiment = dict()
     start = time.time()
-    # threader = SentimentMultithreader(tweets, NUM_THREADS)
-    # coin_sentiment = threader.analyze_sentiment()
-    for index, tweet in enumerate(tweets):
-        if tweet["coin"] not in coin_sentiment.keys():
-            coin_sentiment[tweet["coin"]] = []
-        coin_sentiment[tweet["coin"]].append(tweet["sentiment"])
-        database.insert_tweet(tweet)
-        if (index + 1) % 500 == 0:
-            print("Processed sentiment for", (index+1), "of", len(tweets), "tweets.", end=" ")
-            print("Percent Complete: {:0.2f}".format(index/len(tweets)))
+    threader = SentimentMultithreader(tweets, NUM_THREADS)
+    coin_sentiment = threader.analyze_sentiment()
+    # for index, tweet in enumerate(tweets):
+        # if tweet["coin"] not in coin_sentiment.keys():
+            # coin_sentiment[tweet["coin"]] = {
+                    # "length": 0, 
+                    # "sum": 0, 
+                    # "pos_sentiment": 0, 
+                    # "neg_sentiment": 0
+            # }
+        # if tweet["sentiment"] > 0:
+            # coin_sentiment[tweet["coin"]]["pos_sentiment"] += 1
+        # elif tweet["sentiment"] < 0: 
+            # coin_sentiment[tweet["coin"]]["neg_sentiment"] += 1
+
+        # coin_sentiment[tweet["coin"]]["sum"] += tweet["sentiment"]
+        # coin_sentiment[tweet["coin"]]["length"] += 1
+
+        # database.insert_tweet(tweet)
+        # if (index + 1) % 500 == 0:
+            # print("Processed sentiment for", (index+1), "of", len(tweets), "tweets.", end=" ")
+            # print("Percent Complete: {:0.2f}".format(index/len(tweets)))
     print("Collecting coin sentiment took {:0.2f}s".format(time.time() - start))
 
     # Insert the market data for all the coins in CRYPTOS
@@ -98,22 +110,48 @@ class SentimentMultithreader:
         return self._coin_sentiment
 
 
-    def _process_tweet(self, tweet, database):
-        if tweet["coin"] not in self._coin_sentiment.keys():
-            with self._lock:
-                self._coin_sentiment[tweet["coin"]] = []
-        with self._lock:
-            self._coin_sentiment[tweet["coin"]].append(tweet["sentiment"])
+    def _process_tweet(self, tweet, database, coin_sentiment):
+        if tweet["coin"] not in coin_sentiment.keys():
+            coin_sentiment[tweet["coin"]] = {
+                    "length": 0, 
+                    "sum": 0, 
+                    "pos_sentiment": 0, 
+                    "neg_sentiment": 0
+            }
+        if tweet["sentiment"] > 0:
+            coin_sentiment[tweet["coin"]]["pos_sentiment"] += 1
+        elif tweet["sentiment"] < 0: 
+            coin_sentiment[tweet["coin"]]["neg_sentiment"] += 1
+
+        coin_sentiment[tweet["coin"]]["sum"] += tweet["sentiment"]
+        coin_sentiment[tweet["coin"]]["length"] += 1
         database.insert_tweet(tweet)
 
 
     def _threader(self):
         database = DataManager(CRYPTOS)
+        coin_sentiment = dict()
         while True:
             tweet = self._queue.get()
+
+            # When the multithreading is done, add the results to the final dict
             if tweet is None:
+                with self._lock:
+                    for coin in coin_sentiment.keys():
+                        if coin not in self._coin_sentiment.keys():
+                            self._coin_sentiment[coin] = {
+                                    "length": 0, 
+                                    "sum": 0, 
+                                    "pos_sentiment": 0, 
+                                    "neg_sentiment": 0
+                            }
+                        self._coin_sentiment[coin]["length"] += coin_sentiment[coin]["length"]
+                        self._coin_sentiment[coin]["sum"] += coin_sentiment[coin]["sum"]
+                        self._coin_sentiment[coin]["pos_sentiment"] += coin_sentiment[coin]["pos_sentiment"]
+                        self._coin_sentiment[coin]["neg_sentiment"] += coin_sentiment[coin]["neg_sentiment"]
                 break
-            self._process_tweet(tweet, database)
+
+            self._process_tweet(tweet, database, coin_sentiment)
             self._queue.task_done()
             size = self._queue.qsize()
             num_complete = self._length - size

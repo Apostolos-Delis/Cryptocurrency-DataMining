@@ -140,17 +140,9 @@ class DataManager:
                                {"coin1": [ ... ], "coin2": [ ... ], ... }
         """
         for coin in self.coins: 
-            total_length = len(sentiment_data[coin.name])
-            positive = 0
-            negative = 0
-            for sentiment in sentiment_data[coin.name]:
-                if sentiment > 0:
-                    positive += 1
-                elif sentiment < 0: 
-                    negative += 1
-            average_sentiment = sum(sentiment_data[coin.name]) / total_length
-            pos_percentage = positive / total_length
-            neg_percentage = negative / total_length
+            average_sentiment = sentiment_data[coin.name]["sum"] / sentiment_data[coin.name]["length"]
+            pos_percentage = sentiment_data[coin.name]["pos_sentiment"] / sentiment_data[coin.name]["length"]
+            neg_percentage = sentiment_data[coin.name]["neg_sentiment"] / sentiment_data[coin.name]["length"]
 
             coin_data = coin.current_market_data()
             market_data = {
