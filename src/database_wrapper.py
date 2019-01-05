@@ -69,7 +69,7 @@ class DatabaseWrapper:
         self._cursor.execute(sql_statement)
 
 
-    def show_tables(self):
+    def show_tables(self) -> list:
         self._cursor.execute("SHOW TABLES")
         return [table[0] for table in self._cursor]
 
@@ -105,7 +105,7 @@ class DatabaseWrapper:
         self._cursor.execute("DROP TABLE IF EXISTS {0}".format(table))
 
 
-    def query(self, query: str):
+    def query(self, query: str) -> list:
         self._cursor.execute(query)
         return [q for q in self._cursor]
 
