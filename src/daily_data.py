@@ -68,7 +68,7 @@ def main():
 
     # Insert the market data for all the coins in CRYPTOS
     print("Beginning to Process Market Data")
-    database.fill_market_data_tables(coin_sentiment)
+    database.fill_market_data_tables(coin_sentiment, verbose=True)
 
 
 class SentimentMultithreader:

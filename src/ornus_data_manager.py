@@ -132,14 +132,15 @@ class DataManager:
                     table="cryptocurrencies")
 
 
-    def fill_market_data_tables(self, sentiment_data: dict):
+    def fill_market_data_tables(self, sentiment_data: dict, verbose=False):
         """
         Populate each table for each individual cryptocurrency with its daily market data
         :param sentiment_data: dict storing all the twitter sentiment values for each coin
                                so its structure should be: 
                                {"coin1": [ ... ], "coin2": [ ... ], ... }
+        :paramm verbose: bool on whether to periodically notify the user how much has been completed
         """
-        for coin in self.coins: 
+        for index, coin in enumerate(self.coins): 
             average_sentiment = sentiment_data[coin.name]["sum"] / sentiment_data[coin.name]["length"]
             pos_percentage = sentiment_data[coin.name]["pos_sentiment"] / sentiment_data[coin.name]["length"]
             neg_percentage = sentiment_data[coin.name]["neg_sentiment"] / sentiment_data[coin.name]["length"]
@@ -157,6 +158,10 @@ class DataManager:
                 "average_tweet_sentiment": average_sentiment,
             }
             self._database.insert_into_table(market_data, coin.name.lower())
+            if (index+1) % 10 == 0 and verbose:
+                print("Processed market data for", (index+1), 
+                        "of", len(self.coins), "coins.", end=" ")
+                print("Percent Complete: {:0.2f}".format(index/len(self.coins)))
 
 
     def create_tables(self):
