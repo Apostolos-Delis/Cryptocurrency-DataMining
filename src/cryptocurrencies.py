@@ -38,7 +38,7 @@ CRYPTOS = (
         Cryptocurrency("Ontology", "ONT"),
         Cryptocurrency("0x", "ZRX"),
         Cryptocurrency("Basic_Attention_Token", "BAT"),
-        Cryptocurrency("Lisk", "LSK"),
+        Cryptocurrency("LISK", "LSK"),
         Cryptocurrency("Decred", "DCR"),
         Cryptocurrency("Icon", "ICX")
 )
