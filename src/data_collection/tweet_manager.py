@@ -237,6 +237,7 @@ class TweetManager:
         :param query: the str to be searched
         :param num_tweets: int of max number of tweets to search
         """
+        query = ' ' + query + ' '
         if num_tweets == 0:
             return {"statuses": []}
         try:
