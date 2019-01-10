@@ -145,12 +145,14 @@ class DataManager:
             pos_percentage = sentiment_data[coin.name]["pos_sentiment"] / sentiment_data[coin.name]["length"]
             neg_percentage = sentiment_data[coin.name]["neg_sentiment"] / sentiment_data[coin.name]["length"]
 
+
             coin_data = coin.current_market_data()
             market_data = {
                 "date": coin_data["date"],
                 "open": coin_data["open"],
                 "high": coin_data["high"],
                 "low": coin_data["low"],
+                "close": coin_data["close"],
                 "volume": coin_data["volume"],
                 "num_trades": coin_data["num_trades"],
                 "positive_tweet_sentiment": pos_percentage,
@@ -181,6 +183,7 @@ class DataManager:
                 "open": "FLOAT",
                 "high": "FLOAT",
                 "low": "FLOAT",
+                "close": "FLOAT",
                 "volume": "FLOAT",
                 "num_trades": "INT UNSIGNED",
                 "positive_tweet_sentiment": "FLOAT",
@@ -233,7 +236,39 @@ CREATE TABLE tweet_hashtag (
 
 
 if __name__ == "__main__":
-    pass
+    from cryptocurrencies import CRYPTOS
+    d = DatabaseWrapper()
+    done = [
+        'Bitcoin',
+        'Ethereum',
+        'Ripple',
+        'Bitcoin_Cash',
+        'Eos',
+        'Stellar',
+        'Litecoin',
+        'Bitcoin_SV',
+        'Tron',
+        'Cardano',
+        'Iota',
+        'Binance_Coin',
+        'Monero',
+        'Dash',
+        'NEM',
+        'Ethereum_Classic',
+        'Neo',
+        'Zcash',
+        'Waves',
+        'Bitcoin_Gold',
+        'Vechain',
+        'True_USD',
+        'Qtum',
+        'OmiseGo',
+        'Ziliqa',
+    ]
+    for coin in CRYPTOS:
+        if coin.name not in done:
+            print(coin)
+            d.execute("ALTER TABLE {0} ADD close FLOAT".format(coin.name))
     # tweet = {'id': 1080305732099047424, 'text': 'RT @Vixen_Token: 👉We are Giving 1,000,000 Vixen Token to 1,000 People\n\nSEND ZERO ETH  TO : \n\n0xae367F206eeaeA7F6C4845e5F4F97E1f62a7c1F7\n\nGE…', 'hashtags': [], 'date': '2019-1-02', 'retweets': 35, 'user': {'date_created': '2015-5-27', 'id': 3228352105, 'followers': 473, 'friends': 1050}, 'coin': 'ethereum', 'sentiment': 0.0}
     # database = DataManager([]) 
     # database.insert_tweet(tweet)

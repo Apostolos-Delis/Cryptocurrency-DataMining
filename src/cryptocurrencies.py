@@ -13,7 +13,6 @@ CRYPTOS = (
         Cryptocurrency("Bitcoin_Cash", "BCHABC"),
         Cryptocurrency("Eos", "EOS"),
         Cryptocurrency("Stellar", "XLM"),
-        Cryptocurrency("Stellar", "XLM"),
         Cryptocurrency("Litecoin", "LTC"),
         Cryptocurrency("Bitcoin_SV", "BCHSV"),
         Cryptocurrency("Tron", "TRX"),
