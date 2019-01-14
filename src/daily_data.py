@@ -19,6 +19,7 @@ from ornus_data_manager import DataManager
 
 NUM_TWEETS = 500
 NUM_THREADS = 17
+MULTITHREADING = False
 
 
 def main():
@@ -42,28 +43,32 @@ def main():
     print("Collecting Coin Sentiment")
     coin_sentiment = dict()
     start = time.time()
-    threader = SentimentMultithreader(tweets, NUM_THREADS)
-    coin_sentiment = threader.analyze_sentiment()
-    # for index, tweet in enumerate(tweets):
-        # if tweet["coin"] not in coin_sentiment.keys():
-            # coin_sentiment[tweet["coin"]] = {
-                    # "length": 0, 
-                    # "sum": 0, 
-                    # "pos_sentiment": 0, 
-                    # "neg_sentiment": 0
-            # }
-        # if tweet["sentiment"] > 0:
-            # coin_sentiment[tweet["coin"]]["pos_sentiment"] += 1
-        # elif tweet["sentiment"] < 0: 
-            # coin_sentiment[tweet["coin"]]["neg_sentiment"] += 1
+    
+    if MULTITHREADING:
+        threader = SentimentMultithreader(tweets, NUM_THREADS)
+        coin_sentiment = threader.analyze_sentiment()
+    else:
+        for index, tweet in enumerate(tweets):
+            if tweet["coin"] not in coin_sentiment.keys():
+                coin_sentiment[tweet["coin"]] = {
+                        "length": 0, 
+                        "sum": 0, 
+                        "pos_sentiment": 0, 
+                        "neg_sentiment": 0
+                }
+            if tweet["sentiment"] > 0:
+                coin_sentiment[tweet["coin"]]["pos_sentiment"] += 1
+            elif tweet["sentiment"] < 0: 
+                coin_sentiment[tweet["coin"]]["neg_sentiment"] += 1
 
-        # coin_sentiment[tweet["coin"]]["sum"] += tweet["sentiment"]
-        # coin_sentiment[tweet["coin"]]["length"] += 1
+            coin_sentiment[tweet["coin"]]["sum"] += tweet["sentiment"]
+            coin_sentiment[tweet["coin"]]["length"] += 1
 
-        # database.insert_tweet(tweet)
-        # if (index + 1) % 500 == 0:
-            # print("Processed sentiment for", (index+1), "of", len(tweets), "tweets.", end=" ")
-            # print("Percent Complete: {:0.2f}".format(index/len(tweets)))
+            database.insert_tweet(tweet)
+            if (index + 1) % 500 == 0:
+                print("Processed sentiment for", (index+1), "of", len(tweets), "tweets.", end=" ")
+                print("Percent Complete: {:0.2f}".format(index/len(tweets)))
+
     print("Collecting coin sentiment took {:0.2f}s".format(time.time() - start))
 
     # Insert the market data for all the coins in CRYPTOS
@@ -72,8 +77,17 @@ def main():
 
 
 class SentimentMultithreader:
+    """
+    Class for speeding up the process of inserting tweets into the database
+    and also calculating their sentiment
+    """
 
     def __init__(self, tweets: list, num_threads=10):
+        """
+        :param tweets: list of dicts where each dict is a tweet (as generated 
+                       by data_collection/json_parser.py)
+        :param num_threads: int of how many threads to use
+        """
 
         self.num_threads = num_threads
         self._lock = threading.Lock()
@@ -83,7 +97,25 @@ class SentimentMultithreader:
         self._coin_sentiment = None
 
 
-    def analyze_sentiment(self):
+    def analyze_sentiment(self) -> dict:
+        """
+        returns a dict with the following structure
+            {
+                coin_1: {
+                    "length": 0, 
+                    "sum": 0, 
+                    "pos_sentiment": 0,
+                    "neg_sentiment": 0
+                },
+                {
+                coin_2: {
+                    ...
+            }
+        Here length means how many tweets referenced that coin, sum is a
+        cumulative sum of the sentiment (note this number can be negative since
+        tweets can have a negative sentiment), then pos_sentiment and neg_sentiment 
+        is what percentage of tweets have a positive or negative sentiment.
+        """
         
         self._coin_sentiment = dict()
         self._queue = Queue()
