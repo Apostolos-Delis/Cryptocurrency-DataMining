@@ -19,7 +19,7 @@ from ornus_data_manager import DataManager
 
 NUM_TWEETS = 500
 NUM_THREADS = 17
-MULTITHREADING = False
+MULTITHREADING = True
 
 
 def main():
@@ -48,7 +48,8 @@ def main():
         threader = SentimentMultithreader(tweets, NUM_THREADS)
         coin_sentiment = threader.analyze_sentiment()
     else:
-        for index, tweet in enumerate(tweets):
+        from tqdm import tqdm
+        for index, tweet in tqdm(enumerate(tweets)):
             if tweet["coin"] not in coin_sentiment.keys():
                 coin_sentiment[tweet["coin"]] = {
                         "length": 0, 
