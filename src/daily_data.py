@@ -18,7 +18,7 @@ from data_collection import Cryptocurrency, TweetManager
 from ornus_data_manager import DataManager
 
 NUM_TWEETS = 500
-NUM_THREADS = 17
+NUM_THREADS = 16
 MULTITHREADING = True
 
 
