@@ -218,7 +218,7 @@ class DataManager:
 
         hashtag_schema = {
                 "id": "INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL",
-                "name": "VARCHAR(50) NOT NULL",
+                "name": "VARCHAR(50) UNIQUE NOT NULL",
         }
         self._database.create_table("hashtags", hashtag_schema)
 
