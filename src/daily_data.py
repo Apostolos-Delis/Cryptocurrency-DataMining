@@ -186,12 +186,13 @@ class SentimentMultithreader:
 
             self._process_tweet(tweet, database, coin_sentiment)
             self._queue.task_done()
-            size = self._queue.qsize()
-            num_complete = self._length - size
-            if (num_complete + 1) % 500 == 0:
-                print("Processed sentiment for", (num_complete+1), 
-                        "of", self._length, "tweets.", end=" ")
-                print("Percent Complete: {:0.2f}".format(num_complete/self._length))
+            with self._lock:
+                size = self._queue.qsize()
+                num_complete = self._length - size
+                if (num_complete + 1) % 500 == 0:
+                    print("Processed sentiment for", (num_complete+1),
+                            "of", self._length, "tweets.", end=" ")
+                    print("Percent Complete: {:0.2f}".format(num_complete/self._length))
 
 
 if __name__ == "__main__":

@@ -38,6 +38,7 @@ CRYPTOS = (
         Cryptocurrency("0x", "ZRX"),
         Cryptocurrency("Basic_Attention_Token", "BAT"),
         Cryptocurrency("LISK", "LSK"),
+        Cryptocurrency("Nano", "NANO"),
         Cryptocurrency("Decred", "DCR"),
         Cryptocurrency("Icon", "ICX")
 )

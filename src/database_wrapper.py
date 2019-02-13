@@ -114,8 +114,22 @@ class DatabaseWrapper:
         """Will execute the given sql statement"""
         self._cursor.execute(sql_statement, multi=False)
         self._database.commit()
+    
 
+    def num_elements_per_table(self):
+        """TODO: create this """
+        for table in self.show_tables():
+            print("{0}: {1}".format(table, 
+                d.query(f"SELECT COUNT(*) FROM {table}")[0][0]))
 
 if __name__ == "__main__":
     print("The variable 'd' is an available DatabaseWrapper object")
     d = DatabaseWrapper()
+    print("Displaying Database Statistics:")
+    print("Number of Tweets: {0}".format(d.query("SELECT COUNT(*) FROM tweets")[0][0]))
+    print("Number of Hashtags: {0}".format(d.query("SELECT COUNT(*) FROM Hashtags")[0][0]))
+    print("Number of tweet_hashtags: {0}".format(d.query("SELECT COUNT(*) FROM tweet_hashtag")[0][0]))
+    print("Number of twitter users: {0}".format(d.query("SELECT COUNT(*) FROM twitter_users")[0][0]))
+    print("Most Recent Date collected: {0}".format(d.query("SELECT date FROM Ethereum")[-1]))
+
+    
