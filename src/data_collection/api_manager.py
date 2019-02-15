@@ -10,10 +10,8 @@ import os
 # To allow importing from the parent directory
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if __name__ != "__main__":
-    from .utilities import error
-else:
-    from utilities import error
+if __name__ != "__main__": from .utilities import error else: from utilities import error 
+
 
 class APIManager:
     """
@@ -104,5 +102,3 @@ if __name__ == "__main__":
             print("key:", key)
         count += 1
             
-        
-        
