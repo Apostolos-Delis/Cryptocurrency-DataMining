@@ -159,7 +159,7 @@ class DataManager:
                 "negative_tweet_sentiment": neg_percentage,
                 "average_tweet_sentiment": average_sentiment,
             }
-            self._database.insert_into_table(market_data, coin.name.lower())
+            self._database.insert_into_table(market_data, coin.name)
             if (index+1) % 10 == 0 and verbose:
                 print("Processed market data for", (index+1), 
                         "of", len(self.coins), "coins.", end=" ")
@@ -233,6 +233,56 @@ CREATE TABLE tweet_hashtag (
     PRIMARY KEY (tweet_id, hashtag_id)
 ); """
             self._database.execute(sql_for_tweet_hashtag)
+
+        reddit_comments_schema = {
+                "id": "VARCHAR(20) UNIQUE PRIMARY KEY NOT NULL",
+                "date": "DATE",
+                "content": "VARCHAR(8000) CHARACTER SET utf8 COLLATE utf8_unicode_ci",
+                "coin_id": "INT UNSIGNED NOT NULL",
+                "sentiment": "FLOAT",
+                "user_id": "BIGINT UNSIGNED NOT NULL",
+                "score": "INT UNSIGNED",
+                "parent_id": "BIGINT UNSIGNED",
+                "permalink": "VARCHAR(100)",
+                "submission_id": "VARCHAR(15)",
+        } 
+        self._database.create_table("reddit_comments", reddit_comments_schema)
+
+        reddit_user_schema = {
+                "id": "VARCHAR(20) UNIQUE PRIMARY KEY NOT NULL",
+                "username": "VARCHAR(20)",
+                "date_created": "DATE",
+                "link_karma": "INT UNSIGNED",
+                "comment_karma": "INT UNSIGNED",
+                "subreddit_1_id": "VARCHAR(15)",
+                "subreddit_2_id": "VARCHAR(15)",
+                "subreddit_3_id": "VARCHAR(15)",
+        }
+        self._database.create_table("reddit_users", reddit_user_schema)
+
+        reddit_post_schema = {
+                "id": "VARCHAR(20) UNIQUE PRIMARY KEY NOT NULL",
+                "date": "DATE",
+                "title": "VARCHAR(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci",
+                "content": "VARCHAR(10000) CHARACTER SET utf8 COLLATE utf8_unicode_ci",
+                "coin_id": "INT UNSIGNED NOT NULL",
+                "sentiment": "FLOAT",
+                "user_id": "VARCHAR(20)",
+                "score": "INT UNSIGNED",
+                "num_comments": "INT UNSIGNED",
+                "upvote_percentage": "FLOAT UNSIGNED",
+                "subreddit_id": "BIGINT UNSIGNED NOT NULL",
+                "link": "VARCHAR(100)",
+        }
+        self._database.create_table("reddit_posts", reddit_post_schema)
+
+        subreddit_schema = {
+                "id": "INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL",
+                "name": "VARCHAR(20) UNIQUE NOT NULL",
+                "subscribers": "INT UNSIGNED",
+                "date_created": "DATE",
+        }
+        self._database.create_table("subreddits", subreddit_schema)
 
 
 if __name__ == "__main__":

@@ -7,15 +7,17 @@ Collects the data for the selected coins in CRYPTOS and inserts them into
 the database.
 """
 
+import time
+start = time.time()
 import sys
 import os
 import threading
 from queue import Queue
-import time
 
 from cryptocurrencies import CRYPTOS
 from data_collection import Cryptocurrency, TweetManager
 from ornus_data_manager import DataManager
+print("Importing Complete, took {:0.2f}s".format(time.time() - start))
 
 NUM_TWEETS = 500
 NUM_THREADS = 16
@@ -190,7 +192,7 @@ class SentimentMultithreader:
                 size = self._queue.qsize()
                 num_complete = self._length - size
                 if (num_complete + 1) % 500 == 0:
-                    print("Processed sentiment for", (num_complete+1),
+                    print("Processed sentiment for", (num_complete+1), 
                             "of", self._length, "tweets.", end=" ")
                     print("Percent Complete: {:0.2f}".format(num_complete/self._length))
 
